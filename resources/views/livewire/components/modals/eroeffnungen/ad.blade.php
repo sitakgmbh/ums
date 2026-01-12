@@ -6,11 +6,11 @@
             {{ $infoText }}
         </div>
 
-        @if(!$adUserExists)
-            <div class="alert alert-danger">
-                Der AD-Benutzer existiert nicht.
-            </div>
-        @endif
+		@if($entry->wiedereintritt && !$adUserExists)
+			<div class="alert alert-danger">
+				Der AD-Benutzer existiert nicht.
+			</div>
+		@endif
 
         <div class="mb-2">
             <label class="form-label">Benutzername</label>
