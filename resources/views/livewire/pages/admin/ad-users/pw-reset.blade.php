@@ -1,173 +1,17 @@
 <div class="row">
 
-    <!-- AD -->
+    <!-- LINKS: AD -->
     <div class="col-md-6">
-        <div class="card mb-3">
-            <div class="card-header text-white bg-primary py-1">
-                <strong>Active Directory</strong>
-            </div>
-            <div class="card-body">
-
-                @if($adError)
-                    <div class="alert alert-danger mb-3">{{ $adError }}</div>
-                @endif
-
-                @if($adSuccess)
-                    <div class="alert alert-success mb-3">{{ $adSuccess }}</div>
-                @endif
-
-            <div class="mb-2">
-                <label class="form-label mb-1">Benutzername (AD)</label>
-                <input type="text"
-                       class="form-control"
-                       value="{{ $adUsername }}"
-                       disabled>
-            </div>
-
-            <div class="mb-2">
-                <label class="form-label mb-1">Neues Passwort (AD)</label>
-                <div class="input-group">
-                    <input type="text" class="form-control"
-                           wire:model.defer="adPassword">
-                    <button type="button" class="btn btn-primary"
-                            wire:click="generateAdPassword">
-                        <i class="mdi mdi-autorenew"></i>
-                    </button>
-                </div>
-            </div>
-
-                <div class="form-check mb-1">
-                    <input id="adUnlock" type="checkbox" class="form-check-input"
-                           wire:model="adUnlock" @disabled(!$adIsLocked)>
-                    <label for="adUnlock" class="form-check-label">
-                        Account entsperren
-                    </label>
-                </div>
-
-                <div class="form-check mb-1">
-                    <input id="adToggleActive" type="checkbox" class="form-check-input"
-                           wire:model="adToggleActive">
-                    <label for="adToggleActive" class="form-check-label">
-                        {{ $adIsDisabled ? 'Account aktivieren' : 'Account deaktivieren' }}
-                    </label>
-                </div>
-
-                <div class="form-check mb-3">
-                    <input id="adTogglePwdChange" type="checkbox" class="form-check-input"
-                           wire:model="adTogglePwdChange">
-                    <label for="adTogglePwdChange" class="form-check-label">
-                        @if($adRequiresPwdChange)
-                            'Passwort beim naechsten Login aendern' deaktivieren (aktiviert)
-                        @else
-                            'Passwort beim naechsten Login aendern' aktivieren (deaktiviert)
-                        @endif
-                    </label>
-                </div>
-
-                <button class="btn btn-primary"
-                        wire:click="saveAd"
-                        wire:loading.attr="disabled">
-                    Speichern
-                </button>
-
-            </div>
-        </div>
+        <livewire:pages.admin.ad-users.pw-reset-ad :adUser="$adUser" />
     </div>
 
-
-    <!-- ORBIS -->
+    <!-- RECHTS: ORBIS / KIS -->
     <div class="col-md-6">
-        <div class="card mb-3">
-            <div class="card-header text-white bg-primary py-1">
-                <strong>ORBIT/KIS</strong>
-            </div>
-            <div class="card-body">
-
-                @if($orbisError)
-                    <div class="alert alert-danger mb-3">{{ $orbisError }}</div>
-                @endif
-
-                @if($orbisSuccess)
-                    <div class="alert alert-success mb-3">{{ $orbisSuccess }}</div>
-                @endif
-
-				<div class="mb-2">
-					<label class="form-label mb-1">Benutzername (KIS/ORBIT)</label>
-					<div class="input-group">
-						<input type="text"
-							   class="form-control"
-							   wire:model.defer="orbisUsername">
-
-						<button type="button"
-								class="btn btn-secondary"
-								wire:click="searchOrbisUser"
-								title="Benutzer suchen">
-							<i class="mdi mdi-magnify"></i>
-						</button>
-					</div>
-				</div>
-
-
-@if($orbisFound)
-
-    <div class="form-check mb-2">
-        <input id="orbisLocked"
-               type="checkbox"
-               class="form-check-input"
-               wire:model="orbisLocked">
-        <label for="orbisLocked" class="form-check-label">
-            @if($orbisLocked)
-                Account gesperrt
-            @else
-                Account aktiv
-            @endif
-        </label>
+        <livewire:pages.admin.ad-users.pw-reset-orbis :adUser="$adUser" />
     </div>
 
-    <div class="form-check mb-3">
-        <input id="orbisMustChange"
-               type="checkbox"
-               class="form-check-input"
-               wire:model="orbisMustChange">
-        <label for="orbisMustChange" class="form-check-label">
-            @if($orbisMustChange)
-                'Passwort beim nächsten Login ändern' deaktivieren (aktiviert)
-            @else
-                'Passwort beim nächsten Login ändern' aktivieren (deaktiviert)
-            @endif
-        </label>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label mb-1">Neues Passwort (KIS/ORBIT)</label>
-        <div class="input-group">
-            <input type="text"
-                   class="form-control"
-                   wire:model.defer="orbisPassword">
-            <button type="button"
-                    class="btn btn-primary"
-                    wire:click="generateOrbisPassword">
-                <i class="mdi mdi-autorenew"></i>
-            </button>
-        </div>
-    </div>
-
-    <button class="btn btn-primary"
-            wire:click="saveOrbis"
-            wire:loading.attr="disabled">
-        Speichern
-    </button>
-
-@endif
-
-
-
-            </div>
-        </div>
-    </div>
-
-    <!-- VERIFIKATION -->
-    <div class="col-md-6">
+    <!-- VERIFIKATION darunter -->
+    <div class="col-md-6 mt-3">
         <div class="card mb-3">
             <div class="card-header text-white bg-primary py-1">
                 <strong>Verifikation</strong>
@@ -176,19 +20,19 @@
 
                 <dl class="row mb-2">
                     <dt class="col-4">Vorname</dt>
-                    <dd class="col-8">{{ $ad->firstname ?? '—' }}</dd>
+                    <dd class="col-8">{{ $adUser->firstname ?? '—' }}</dd>
 
                     <dt class="col-4">Nachname</dt>
-                    <dd class="col-8">{{ $ad->lastname ?? '—' }}</dd>
+                    <dd class="col-8">{{ $adUser->lastname ?? '—' }}</dd>
 
                     <dt class="col-4">E-Mail</dt>
-                    <dd class="col-8">{{ $ad->email ?? '—' }}</dd>
+                    <dd class="col-8">{{ $adUser->email ?? '—' }}</dd>
 
                     <dt class="col-4">Geburtsdatum</dt>
                     <dd class="col-8">
-                        @if($ad->extensionattribute14)
+                        @if($adUser->extensionattribute14)
                             @php
-                                $geburt = \Carbon\Carbon::createFromFormat('Ymd', $ad->extensionattribute14);
+                                $geburt = \Carbon\Carbon::createFromFormat('Ymd', $adUser->extensionattribute14);
                                 $alter = $geburt->age;
                             @endphp
                             {{ $geburt->format('d.m.Y') }} ({{ $alter }})
@@ -198,13 +42,13 @@
                     </dd>
                 </dl>
 
-                @if ($sap)
+                @if ($adUser->sapExport)
                     <dl class="row mb-0 mt-3">
                         <dt class="col-4">Private Adresse</dt>
                         <dd class="col-8">
-                            {{ $sap->d_adr1_stras ?? '—' }}
+                            {{ $adUser->sapExport->d_adr1_stras ?? '—' }}
                             <br>
-                            {{ $sap->d_adr1_pstlz ?? '' }} {{ $sap->d_adr1_ort01 ?? '' }}
+                            {{ $adUser->sapExport->d_adr1_pstlz ?? '' }} {{ $adUser->sapExport->d_adr1_ort01 ?? '' }}
                         </dd>
                     </dl>
                 @endif
