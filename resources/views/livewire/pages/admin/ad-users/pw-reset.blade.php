@@ -111,17 +111,21 @@
 				</div>
 
 
-                <div class="form-check mb-3">
-                    <input id="orbisMustChange" type="checkbox" class="form-check-input"
-                           wire:model="orbisMustChange">
-                    <label for="orbisMustChange" class="form-check-label">
-                        @if($orbisMustChange)
-                            'Passwort beim naechsten Login aendern' deaktivieren (aktiviert)
-                        @else
-                            'Passwort beim naechsten Login aendern' aktivieren (deaktiviert)
-                        @endif
-                    </label>
-                </div>
+				<div class="form-check mb-3">
+					<input id="orbisMustChange"
+						   type="checkbox"
+						   class="form-check-input"
+						   wire:model="orbisMustChange">
+
+					<label for="orbisMustChange" class="form-check-label">
+						@if($orbisMustChange)
+							'Passwort beim naechsten Login aendern' deaktivieren (aktiviert)
+						@else
+							'Passwort beim naechsten Login aendern' aktivieren (deaktiviert)
+						@endif
+					</label>
+				</div>
+
 
                 <button class="btn btn-primary"
                         wire:click="saveOrbis"

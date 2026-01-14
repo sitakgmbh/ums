@@ -38,6 +38,7 @@ class PwReset extends Component
         $this->loadAdStatus();
 		$this->adUsername = strtoupper($this->adUser->username);
         $this->orbisUsername = strtoupper($this->adUser->username);
+		$this->loadOrbisStatus();
     }
 
     private function loadAdStatus(): void
@@ -62,6 +63,30 @@ class PwReset extends Component
         $this->adUnlock = $this->adIsLocked;
         $this->adTogglePwdChange = false;
     }
+
+	private function loadOrbisStatus(): void
+	{
+		$this->orbisError = null;
+		$this->orbisSuccess = null;
+
+		try {
+			$helper = app(\App\Services\Orbis\OrbisHelper::class);
+			$username = strtoupper($this->orbisUsername);
+
+			$response = $helper->getUserByUsername($username);
+
+			if (!$response || empty($response['id'])) {
+				$this->orbisError = "Benutzer in ORBIS nicht gefunden.";
+				return;
+			}
+
+			$this->orbisMustChange = (bool)($response['mustchangepassword'] ?? false);
+
+		} catch (\Throwable $e) {
+			$this->orbisError = "Exception: " . $e->getMessage();
+		}
+	}
+
 
     public function generateAdPassword(): void
     {
