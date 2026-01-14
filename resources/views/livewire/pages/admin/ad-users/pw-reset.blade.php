@@ -32,7 +32,7 @@
 
     @if($adUser->sapExport)
         <div>
-            Adresse: 
+            Privat-Adresse: 
             {{ $adUser->sapExport->d_adr1_stras ?? '' }},
             {{ $adUser->sapExport->d_adr1_pstlz ?? '' }}
             {{ $adUser->sapExport->d_adr1_ort01 ?? '' }}
