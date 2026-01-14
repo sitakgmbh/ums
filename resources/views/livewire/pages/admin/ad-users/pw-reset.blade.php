@@ -1,4 +1,4 @@
-<div class="alert alert-info mb-3">
+<div class="alert alert-warning mb-3">
 
     <div class="mb-1">
         <strong>Bitte verifiziere die Benutzerinformationen, bevor du ein Passwort zurücksetzt!</strong>
