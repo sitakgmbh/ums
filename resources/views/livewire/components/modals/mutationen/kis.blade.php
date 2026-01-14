@@ -256,6 +256,11 @@
                         @endif
                     </div>
                 @endforeach
+
+				<div class="alert alert-info mt-2 mb-0 d-flex align-items-center gap-2" role="alert">
+					<i class="ri-information-line fs-5"></i><span>Bitte TVER beachten!</span>
+				</div>
+
             </div>
         @endif
     </div>

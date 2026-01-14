@@ -69,8 +69,8 @@ class EroeffnungForm extends Form
 
 	public bool $is_lei = false;
 
-	public bool $tel_status = false;
-	public ?string $tel_auswahl = null;
+	public bool $tel_status = true;
+	public ?string $tel_auswahl = "manuell";
 	public ?string $tel_nr = null;
 	public bool $tel_tischtel = false;
 	public bool $tel_mobiltel = false;

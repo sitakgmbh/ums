@@ -4,8 +4,10 @@
 	<div class="row">
 		<div class="col-12">
 			<div class="card">
+                <div class="card-header text-white bg-primary py-1">
+                    <strong>Wochenübersicht</strong>
+                </div>
 				<div class="card-body">
-					<h5 class="card-title">Wochenübersicht</h5>
 					<div class="table-responsive">
 						<table class="table table-sm table-bordered mb-0">
 							<thead class="bg-light">
@@ -109,8 +111,10 @@
     <div class="row">
         <div class="col-12 col-md-12 col-lg-6">
             <div class="card">
+                <div class="card-header text-white bg-primary py-1">
+                    <strong>Hilfe</strong>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title">Hilfe</h5>
                     <p class="card-text">
                         Klicke auf <strong>Eröffnung erstellen</strong>, um einen neuen Eintritt oder Wiedereintritt zu erfassen.<br>
                         Über <strong>Mutation erstellen</strong> kannst du bestehende Benutzerdaten aktualisieren.<br>

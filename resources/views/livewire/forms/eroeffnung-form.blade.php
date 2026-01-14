@@ -20,11 +20,11 @@
                         </div>
                         <div class="col-md-6 d-flex flex-column gap-1">
                             <label for="vorname" class="form-label mb-0">Vorname</label>
-                            <input type="text" id="vorname" wire:model.blur="form.vorname" class="form-control" @disabled($form->isReadonly)>
+                            <input type="text" id="vorname" wire:model.trim.blur="form.vorname" class="form-control" @disabled($form->isReadonly)>
                         </div>
                         <div class="col-md-6 d-flex flex-column gap-1">
                             <label for="nachname" class="form-label mb-0">Nachname</label>
-                            <input type="text" id="nachname" wire:model.blur="form.nachname" class="form-control" @disabled($form->isReadonly)>
+                            <input type="text" id="nachname" wire:model.trim.blur="form.nachname" class="form-control" @disabled($form->isReadonly)>
                         </div>
                     </div>
 

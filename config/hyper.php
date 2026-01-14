@@ -26,7 +26,7 @@ return [
             'title' => 'Admin',
             'items' => [
                 [
-                    'label' => 'Verarbeitung',
+                    'label' => 'Verarbeitung Anträge',
                     'icon'  => 'mdi mdi-hammer-screwdriver',
                     'children' => [
                         [

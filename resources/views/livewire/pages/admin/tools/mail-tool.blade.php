@@ -1,142 +1,172 @@
-<div class="card">
-    <div class="card-body">
-		@if($errors->any())
-			<div class="alert alert-danger">
-				<p>Etwas hat nicht funktioniert:</p>
-				<ul class="mb-0">
-					@foreach($errors->all() as $error)
-						<li>{{ $error }}</li>
-					@endforeach
-				</ul>
-			</div>
-		@endif
+<div id="mail-tool-root" wire:id="{{ $this->getId() }}">
+    <div class="card">
+        <div class="card-body">
 
-        <div class="row">
-            {{-- Auswahl Mailable --}}
-            <div class="col-md-6">
-                <label class="form-label">Mailable auswählen</label>
-                <select id="mailable" class="form-select" wire:model="selectedMailable">
-                    <option value="">Bitte wählen</option>
-                    @foreach($mailables as $group)
-                        <optgroup label="{{ $group['label'] }}">
-                            @foreach($group['items'] as $key => $item)
-                                <option
-                                    value="{{ $key }}"
-                                    data-requires-model="{{ $item['model'] ? '1' : '0' }}"
-                                    data-model-type="{{ $item['modelType'] ?? '' }}"
-                                >
-                                    {{ $item['label'] }}
-                                </option>
-                            @endforeach
-                        </optgroup>
-                    @endforeach
-                </select>
+            <div class="row">
+                <div class="col-md-6" wire:ignore>
+                    <label class="form-label">E-Mail</label>
+                    <select id="mailable" class="form-select select2">
+                        <option value="">Bitte auswählen</option>
+                        @foreach($mailables as $group)
+                            <optgroup label="{{ $group['label'] }}">
+                                @foreach($group['items'] as $key => $item)
+                                    <option
+                                        value="{{ strtolower($key) }}"
+                                        data-requires-model="{{ $item['model'] ? '1' : '0' }}"
+                                        data-model-type="{{ $item['modelType'] ?? '' }}"
+                                    >
+                                        {{ $item['label'] }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    </select>
+					<label class="form-text">Wähle die E-Mail aus, die du verwenden möchtest.</label>
+                </div>
+
+                <div id="model-wrapper" class="col-md-6" wire:ignore style="display:none;">
+                    <label class="form-label">Datensatz</label>
+                    <select id="model" class="form-select select2-model">
+                        <option value="">Bitte auswählen</option>
+                    </select>
+					<label class="form-text">Wähle einen Antrag aus, dessen Angaben du verwenden möchtest.</label>
+                </div>
             </div>
 
-            {{-- Auswahl Model --}}
-            <div id="model-wrapper" class="col-md-6" style="display: none;">
-                <label class="form-label" id="model-label">Model auswählen</label>
-                <select id="model" class="form-select" wire:model="selectedModelId">
-                    <option value="">Bitte wählen</option>
-                </select>
+            <div class="row mt-3" id="testmail-section" @if(!$this->showTestSection) style="display:none;" @endif>
+                <div class="col-md-6">
+                    <label class="form-label">Empfänger</label>
+                    <input type="email" wire:model="recipient" class="form-control" placeholder="test@example.ch">
+                </div>
+
+                <div class="col-md-6 d-flex align-items-end gap-2">
+                    
+					<button
+						class="btn btn-primary"
+						wire:click="send"
+						wire:loading.attr="disabled"
+						wire:target="send"
+					>
+						<span wire:loading.remove wire:target="send">E-Mail senden</span>
+						<span wire:loading wire:target="send">Wird gesendet…</span>
+					</button>
+					
+					@if($this->previewUrl)
+						<a href="{{ $this->previewUrl }}" target="_blank" class="btn btn-secondary">
+							Vorschau anzeigen
+						</a>
+					@endif
+
+                </div>
             </div>
-        </div>
 
-        {{-- Vorschau & Testversand --}}
-        <div class="row mt-4" id="testmail-section" style="display: none;">
-			<div class="col-md-6">
-				<label class="form-label">Empfänger</label>
-				<input type="email" wire:model="recipient" class="form-control" placeholder="test@example.ch">
-			</div>
-			<div class="col-md-6 d-flex align-items-end gap-2">
-				<x-action-button action="send">E-Mail senden</x-action-button>
+			@if($errors->any())
+				<div class="alert alert-danger mt-3 mb-0">
+					<p>Etwas hat nicht funktioniert:</p>
+					<ul class="mb-0">
+						@foreach($errors->all() as $error)
+							<li>{{ $error }}</li>
+						@endforeach
+					</ul>
+				</div>
+			@endif
 
-				<a id="preview-button" href="{{ $previewUrl ?? '#' }}" target="_blank" class="btn btn-secondary">
-					Vorschau anzeigen
-				</a>
-			</div>
+			@if($status)
+				<div class="alert alert-{{ $statusType }} mt-3 mb-0">
+					{{ $status }}
+				</div>
+			@endif
+
         </div>
     </div>
 </div>
 
 @push('scripts')
 <script>
-    const mailables = @json($flatMailables);
-    const models = @json($models);
+    let componentId = null;
 
-    const mailableSelect = document.getElementById("mailable");
-    const modelWrapper = document.getElementById("model-wrapper");
-    const modelSelect = document.getElementById("model");
-    const modelLabel = document.getElementById("model-label");
-    const previewButton = document.getElementById("preview-button");
-    const testmailSection = document.getElementById("testmail-section");
-
-    const modelTypeTranslations = {
-        eroeffnungen: "Eröffnung",
-        mutationen: "Mutation",
-        austritte: "Austritt",
-    };
-
-    function updateModelDropdown(modelType) {
-        modelSelect.innerHTML = '<option value="">Bitte wählen</option>';
-        if (!models[modelType]) return;
-
-        models[modelType].forEach((item) => {
-            const option = document.createElement("option");
-            option.value = item.id;
-            option.textContent = item.label;
-            modelSelect.appendChild(option);
-        });
-
-        const label = modelTypeTranslations[modelType] ?? modelType;
-        modelWrapper.style.display = "block";
-        modelLabel.textContent = `${label} auswählen`;
-    }
-
-    function updatePreviewButton() {
-        const selectedMailable = mailableSelect.value;
-        const selectedOption = mailableSelect.options[mailableSelect.selectedIndex];
-        const requiresModel = selectedOption?.dataset?.requiresModel === "1";
-        const modelType = selectedOption?.dataset?.modelType ?? '';
-        const modelId = modelSelect.value;
-
-        let url = null;
-
-        if (selectedMailable && !requiresModel) {
-            url = `/admin/tools/mail-preview/render?mailable=${selectedMailable}`;
+    document.addEventListener('livewire:initialized', () => {
+        const el = document.querySelector('#mail-tool-root');
+        if (el) {
+            componentId = el.getAttribute('wire:id');
         }
-
-        if (selectedMailable && requiresModel && modelId) {
-            url = `/admin/tools/mail-preview/render?mailable=${selectedMailable}&model_id=${modelId}`;
-        }
-
-        if (url) {
-            previewButton.href = url;
-            previewButton.style.display = "inline-block";
-            testmailSection.style.display = "flex";
-        } else {
-            previewButton.style.display = "none";
-            testmailSection.style.display = "none";
-        }
-    }
-
-    mailableSelect.addEventListener("change", function () {
-        const selectedOption = this.options[this.selectedIndex];
-        const requiresModel = selectedOption.dataset.requiresModel === "1";
-        const modelType = selectedOption.dataset.modelType;
-
-        if (requiresModel && modelType) {
-            updateModelDropdown(modelType);
-        } else {
-            modelWrapper.style.display = "none";
-            modelSelect.innerHTML = '';
-        }
-
-        updatePreviewButton();
     });
 
-    modelSelect.addEventListener("change", function () {
-        updatePreviewButton();
+    const models = @json($models);
+    const modelWrapper = $('#model-wrapper');
+
+    function updateModelDropdown(modelType) {
+        const modelSelect = $('#model');
+        modelSelect.empty().append('<option value="">Bitte auswählen</option>');
+
+        if (!models[modelType]) {
+            modelWrapper.hide();
+            return;
+        }
+
+        models[modelType].forEach(item => {
+            modelSelect.append(new Option(item.label, item.id));
+        });
+
+        if (!modelSelect.data('select2')) {
+            modelSelect.select2({
+                placeholder: 'Bitte auswählen',
+                width: '100%',
+                allowClear: true
+            });
+
+            modelSelect.on('change.select2', function () {
+                if (componentId) {
+                    Livewire.find(componentId).set('selectedModelId', $(this).val());
+                }
+            });
+
+        } else {
+            modelSelect.val('').trigger('change.select2');
+        }
+
+        modelWrapper.show();
+    }
+
+    $(document).ready(function () {
+
+        $('#mailable').select2({
+            placeholder: 'Bitte auswählen',
+            width: '100%',
+            allowClear: false
+        }).on('change.select2', function () {
+            const value = $(this).val();
+
+            if (componentId) {
+                Livewire.find(componentId).set('selectedMailable', value);
+            }
+
+            const option = document.querySelector(`#mailable option[value="${value}"]`);
+            const requiresModel = option?.dataset?.requiresModel === '1';
+            const modelType = option?.dataset?.modelType;
+
+            if (requiresModel && modelType) {
+                updateModelDropdown(modelType);
+            } else {
+                modelWrapper.hide();
+                $('#model').empty();
+            }
+        });
+    });
+
+    document.addEventListener('livewire:update', () => {
+        // Select2 re-init falls Model-Dropdown neu gerendert wurde
+        if ($('#model').length && !$('#model').data('select2')) {
+            $('#model').select2({
+                placeholder: 'Bitte auswählen',
+                width: '100%',
+                allowClear: true
+            }).on('change.select2', function () {
+                if (componentId) {
+                    Livewire.find(componentId).set('selectedModelId', $(this).val());
+                }
+            });
+        }
     });
 </script>
 @endpush

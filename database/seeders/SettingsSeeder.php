@@ -17,6 +17,14 @@ class SettingsSeeder extends Seeder
                 "name" => "Debug-Modus",
                 "description" => "Aktiviert erweiterte Protokollierung. Diese Option generiert viele Logs und sollte nicht permanent aktivert sein.",
             ],
+			[
+				"key" => "show_help",
+				"value" => "admin",
+				"type" => "enum",
+				"name" => "Hilfe anzeigen",
+				"description" => "Blendet unten rechts einen Link zur Hilfe-Funktion ein.",
+				"options" => ["off", "admin", "all"],
+			],
             [
                 "key" => "sap_ad_abgleich_excludes_personalnummern",
                 "value" => "",

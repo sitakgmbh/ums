@@ -66,6 +66,11 @@ class SapExport extends Model
         'alarm_enabled' => 'boolean',
     ];
 
+	public function hasAdUser(): bool
+	{
+		return $this->ad_user_id !== null;
+	}
+
     public function adUser()
     {
         return $this->belongsTo(AdUser::class);

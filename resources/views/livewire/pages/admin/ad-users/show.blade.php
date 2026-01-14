@@ -1,5 +1,11 @@
 <div>
 
+	@section("pageActions")
+		<a href="{{ route('admin.ad-users.pw-reset', $adUser->id) }}" class="btn btn-primary" title="Passwort ändern">
+			<i class="mdi mdi-lock"></i>
+		</a>
+	@endsection
+
 	@if(!$adUser->is_existing)
 		<div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
 			<i class="mdi mdi-alert-circle-outline me-1"></i>

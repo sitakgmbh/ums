@@ -23,6 +23,20 @@
                                     {{ $s['description'] }}
                                 </small>
                             </div>
+						@elseif ($s['type'] === 'enum')
+							<div>
+								<label for="setting_{{ $s['key'] }}" class="form-label">{{ $s['name'] }}</label>
+								<select id="setting_{{ $s['key'] }}"
+										class="form-select"
+										wire:model.defer="settings.{{ $group }}.{{ $index }}.value">
+
+									<option value="off">Aus</option>
+									<option value="admin">Nur Admins</option>
+									<option value="all">Alle Benutzer</option>
+
+								</select>
+								<small class="form-text text-muted">{{ $s['description'] }}</small>
+							</div>
                         @elseif ($s['type'] === 'password')
                             <div>
                                 <label for="setting_{{ $s['key'] }}" class="form-label">{{ $s['name'] }}</label>

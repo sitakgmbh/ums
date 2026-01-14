@@ -17,6 +17,7 @@ class Setting extends Model
         return match ($this->type) {
             "bool"     => (bool) $value,
             "int"      => (int) $value,
+			"enum"     => $value,
             "json"     => json_decode($value, true),
             "password" => $value ? Crypt::decryptString($value) : null,
             default    => $value,
@@ -29,6 +30,7 @@ class Setting extends Model
             "bool"     => $value ? 1 : 0,
             "json"     => json_encode($value),
             "password" => $value ? Crypt::encryptString($value) : null,
+			"enum"     => $value,
             default    => (string) $value,
         };
     }

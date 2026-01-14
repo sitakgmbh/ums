@@ -1,3 +1,9 @@
+@php
+    $pageHelpKey = request()->route()?->getName();
+    $helpFile = $pageHelpKey ? resource_path("help/{$pageHelpKey}.md") : null;
+    $hasHelp = $helpFile && file_exists($helpFile);
+@endphp
+
 <div>
 	<!-- Footer Start -->
 	<footer class="footer">
@@ -8,6 +14,29 @@
 				</div>
 				<div class="col-md-6">
 					<div class="text-md-end footer-links d-none d-md-block">
+						@php
+							$mode = \App\Models\Setting::getValue('show_help', 'off');
+							$routeName = request()->route()->getName();
+							$user = auth()->user();
+
+							$showHelp = match ($mode) {
+								'all' => true,
+								'admin' => $user && (
+									(method_exists($user, 'isAdmin') && $user->isAdmin())
+									|| (method_exists($user, 'hasRole') && $user->hasRole('admin'))
+								),
+								default => false
+							};
+						@endphp
+
+						@if($showHelp && Route::has('help.viewer'))
+							<a href="#"
+							   onclick="window.open('{{ route('help.viewer', ['key' => $routeName]) }}',
+													'help', 'width=900,height=700'); return false;">
+								Hilfe
+							</a>
+						@endif
+						
 						<a href="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasHelp">Kontakt</a>
 					</div>
 				</div>

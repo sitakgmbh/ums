@@ -18,6 +18,8 @@ use App\Livewire\Pages\Admin\Tools\MailTool;
 use App\Http\Controllers\Admin\Tools\MailPreviewController;
 use App\Livewire\Pages\Admin\AdminDashboard;
 use Illuminate\Support\Facades\Auth;
+use App\Livewire\Pages\Admin\SapExport\Index as SapExportIndex;
+use App\Livewire\Pages\Admin\SapExport\Archive as SapExportArchiveIndex;
 
 Route::redirect("/", "/dashboard");
 Route::get("/login", Login::class)->name("login");
@@ -33,6 +35,7 @@ Route::middleware(["auth", "verified"])->group(function ()
     Route::get("/dashboard", Dashboard::class)->name("dashboard");
     Route::get("/profile/edit", ProfileEdit::class)->name("profile.edit");
 	Route::get("/profile/settings", \App\Livewire\Pages\Profile\UserSettings::class)->middleware("auth")->name("profile.settings");
+	Route::get('/help/{key}', \App\Livewire\Help\Viewer::class)->name('help.viewer');
 
 	Route::prefix("eroeffnungen")->name("eroeffnungen.")->group(function () 
 	{
@@ -68,7 +71,14 @@ Route::middleware(["auth", "verified"])->group(function ()
         // AD Users
         Route::prefix("ad-users")->name("admin.ad-users.")->group(function () {
             Route::get("/", AdUsersIndex::class)->name("index");
-            Route::get("/{adUser}", AdUsersShow::class)->name("show");
+			Route::get("/{adUser}/pw-reset", \App\Livewire\Pages\Admin\AdUsers\PwReset::class)->name("pw-reset");
+			Route::get("/{adUser}", AdUsersShow::class)->name("show");			
+        });
+
+		// SAP Export
+        Route::prefix("sap-export")->name("admin.sap-export.")->group(function () {
+            Route::get("/archive", SapExportArchiveIndex::class)->name("archive");
+			Route::get("/", SapExportIndex::class)->name("index");
         });
 
         // Logs

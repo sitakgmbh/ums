@@ -12,15 +12,10 @@ class Settings extends Component
     public array $settings = [];
 
     protected array $groupMap = [
-        "debug_mode"          => "Allgemein",
 		"sap_ad_abgleich_excludes_personalnummern" => "Abgleich SAP ↔ AD",
 		"sap_ad_abgleich_excludes_benutzernamen" => "Abgleich SAP ↔ AD",
-        "azure_tenant_id"     => "Microsoft Graph",
-        "azure_client_id"     => "Microsoft Graph",
-        "azure_client_secret" => "Microsoft Graph",
-		"otobo_url" => "Otobo",
-		"otobo_username" => "Otobo",
-		"otobo_password" => "Otobo",
+        "debug_mode"          => "System",
+		"show_help"          => "System",
     ];
 
     public function mount(): void

@@ -1,0 +1,31 @@
+{
+  "": {
+    "items": [
+      {
+        "routes": ["dashboard"],
+        "title": "Dashboard"
+      }
+    ]
+  },
+  "Systemsteuerung": {
+    "roles": ["admin"],
+    "items": [
+      {
+        "routes": ["admin.settings"],
+        "title": "Einstellungen",
+        "roles": ["admin"]
+      },
+      {
+        "routes": ["admin.logs.index", "admin.logfiles.index"],
+        "title": "Logs",
+		"page": "admin.logs.index",
+        "roles": ["admin"]
+      },
+      {
+        "page": "api",
+        "title": "API",
+        "roles": ["admin"]
+      }
+    ]
+  }
+}

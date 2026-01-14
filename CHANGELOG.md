@@ -4,6 +4,14 @@ Alle Änderungen an diesem Projekt werden in diesem Dokument festgehalten.
 
 ---
 
+## [1.1.4] – 16.01.2025
+
+#### Neuigkeiten
+- Die Seite ***SAP Export*** wurde hinzugefügt, welche den aktuellen SAP Export aus der Datenbank darstellt. Zudem können archivierte SAP Exporte als Tabelle angezeigt oder heruntergeladen werden.
+
+#### Änderungen
+- Der Task ***check:sap-ad-mappings*** prüft nur noch vorhandene AD-Benutzer (is_exisiting = true), da es vorkommt, dass AD-Benutzer erstellt, gelöscht und nochmals erstellt werden.
+
 ## [1.1.3] – 05.01.2025
 
 #### Änderungen

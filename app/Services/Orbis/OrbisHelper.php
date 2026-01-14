@@ -752,4 +752,27 @@ class OrbisHelper
 			$employee
 		);
 	}
+
+
+	public function resetUserPassword(int $userId, string $username, string $newPassword, bool $mustChange = false): bool
+	{
+		$payload = [
+			"id" => $userId,
+			"name" => strtoupper($username),
+			"password" => base64_encode($newPassword),
+			"mustchangepassword" => $mustChange
+		];
+
+		$response = $this->client->send(
+			$this->client->getBaseUrl() . "/resources/external/users",
+			"PUT",
+			$payload
+		);
+
+		return is_array($response);
+	}
+
+
+
+
 }

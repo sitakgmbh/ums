@@ -27,23 +27,32 @@ return [
     */
 
 
-    'connections' => [
+	'connections' => [
 
-        'default' => [
-            'hosts'    => array_filter(explode(',', env('LDAP_HOSTS', env('LDAP_HOST')))),
-            'port'     => env('LDAP_PORT', 389),
-            'username' => env('LDAP_USERNAME'),
-            'password' => env('LDAP_PASSWORD'),
-            'base_dn'  => env('LDAP_BASE_DN'),
-            'timeout'  => env('LDAP_TIMEOUT', 5),
+		'default' => [
+			'hosts'    => array_filter(explode(',', env('LDAP_HOSTS', env('LDAP_HOST')))),
+			'port'     => env('LDAP_PORT', 389),
+			'username' => env('LDAP_USERNAME'),
+			'password' => env('LDAP_PASSWORD'),
+			'base_dn'  => env('LDAP_BASE_DN'),
+			'timeout'  => env('LDAP_TIMEOUT', 5),
 
-            'use_ssl'  => env('LDAP_SSL', false),
-            'use_tls'  => env('LDAP_TLS', false),
-            'use_sasl' => env('LDAP_SASL', false),
-            'sasl_options' => [],
-        ],
+			'use_ssl'  => env('LDAP_SSL', false),
+			'use_tls'  => env('LDAP_TLS', false),
+			'use_sasl' => env('LDAP_SASL', false),
 
-    ],
+			'sasl_options' => [],
+
+			'options' => [
+				LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_ALLOW,
+				LDAP_OPT_PROTOCOL_VERSION => 3,
+				LDAP_OPT_REFERRALS => 0,
+			],
+		],
+
+	],
+
+
 
     /*
     |--------------------------------------------------------------------------
