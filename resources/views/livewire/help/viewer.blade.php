@@ -29,72 +29,73 @@
 {{-- SIDEBAR --}}
 <div class="sidebar" id="help-sidebar">
 
-    @foreach($toc as $title => $group)
+@foreach($toc as $title => $group)
 
-        @php
-            $groupAllowed = !isset($group['roles']) || $this->hasRoleAccess($group['roles']);
-        @endphp
+    @php
+        $groupAllowed = !isset($group['roles']) || $this->hasRoleAccess($group['roles']);
+    @endphp
 
-        @continue(!$groupAllowed)
+    @continue(!$groupAllowed)
 
-        <div class="toc-group">
-            <div class="toc-title">{{ $title }}</div>
+    @php
+        $visibleItems = collect($group['items'])->filter(function($entry) {
+            $roles = $entry['roles'] ?? null;
+            return !$roles || $this->hasRoleAccess($roles);
+        });
+    @endphp
 
-            {{-- ITEMS --}}
-            @foreach($group['items'] ?? [] as $entry)
+    @continue($visibleItems->isEmpty())
 
-                @php
-                    $label   = $entry['title'];
-                    $roles   = $entry['roles'] ?? null;
+    <div class="toc-group">
 
-                    if ($roles && !$this->hasRoleAccess($roles)) {
-                        continue;
+        {{-- nur rendern wenn titel vorhanden --}}
+		@if(!in_array($title, ['', '_', '_2']))
+			<div class="toc-title">{{ $title }}</div>
+		@endif
+
+
+
+        {{-- items --}}
+        @foreach($visibleItems as $entry)
+
+            @php
+                $label  = $entry['title'];
+                $routes = $entry['routes'] ?? [];
+                $page   = $entry['page'] ?? null;
+
+                $allKeys = [...$routes, ...($page ? [$page] : [])];
+
+                $isActive = in_array($key, $allKeys, true);
+
+                if(!$isActive && request()->route()) {
+                    $current = request()->route()->getName();
+                    if($current && in_array($current, $allKeys, true)) {
+                        $isActive = true;
                     }
+                }
 
-                    $routes = $entry['routes'] ?? [];
-                    $page   = $entry['page'] ?? null;
+                if ($page) {
+                    $target = 'page:' . $page;
+                } elseif(!empty($routes)) {
+                    $target = 'route:' . $routes[0];
+                } else {
+                    $target = null;
+                }
+            @endphp
 
-                    // Keys zur Aktiverkennung
-                    $allKeys = [
-                        ...$routes,
-                        ...($page ? [$page] : [])
-                    ];
-
-                    // Ist die aktuelle Seite dabei?
-                    $isActive = in_array($key, $allKeys, true);
-
-                    // auch echte Laravel Route berücksichtigen
-                    if (!$isActive && request()->route()) {
-                        $currentRoute = request()->route()->getName();
-                        if ($currentRoute && in_array($currentRoute, $allKeys, true)) {
-                            $isActive = true;
-                        }
-                    }
-
-                    // Target bestimmen
-                    if ($page) {
-                        $target = 'page:' . $page;
-                    } elseif (!empty($routes)) {
-                        $target = 'route:' . $routes[0]; // erste als canonical
-                    } else {
-                        $target = null;
-                    }
-                @endphp
-
-                @if($target)
+            @if($target)
                 <div class="toc-item {{ $isActive ? 'toc-item-active' : '' }}"
                      wire:click="goTo('{{ $target }}')">
                     {{ $label }}
                 </div>
-                @endif
+            @endif
 
-            @endforeach
+        @endforeach
 
-        </div>
-
-    @endforeach
-
+    </div>
+@endforeach
 </div>
+
 
 
 

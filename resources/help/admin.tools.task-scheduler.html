@@ -1,0 +1,67 @@
+<h1>Aufgabenplanung</h1>
+
+<p>
+    Die Aufgabenplanung dient zur Einsicht und Steuerung der im System hinterlegten geplanten
+    Hintergrundprozesse. Diese Prozesse werden in regelmässigen Intervallen automatisch ausgeführt
+    (z. B. Datensynchronisationen, Prüfungen, Backups).
+</p>
+
+<h2>Geplante Aufgaben</h2>
+
+<p>
+    Im oberen Bereich werden alle aktuell geplanten Aufgaben angezeigt, die über den internen
+    Scheduler konfiguriert sind. Zu jedem Eintrag werden folgende Informationen dargestellt:
+</p>
+
+<ul>
+    <li><strong>Befehl</strong> – Name des Artisan Commands</li>
+    <li><strong>Beschreibung</strong> – Kurzbeschreibung des Befehls</li>
+    <li><strong>Intervall</strong> – menschlich lesbarer Ausführungsrhythmus (z. B. „Täglich um 02:00 Uhr“)</li>
+    <li><strong>Nächste Ausführung</strong> – geplanter Zeitpunkt der kommenden Ausführung</li>
+</ul>
+
+<p>
+    Die Sortierung erfolgt automatisch nach dem nächsten Ausführungstermin, damit zeitnahe Tasks oben erscheinen.
+</p>
+
+<h2>Manuell ausführen</h2>
+
+<p>
+    Unterhalb der Übersicht befinden sich Befehle, die manuell gestartet werden können. Jeder Eintrag zeigt:
+</p>
+
+<ul>
+    <li>den Befehlsnamen</li>
+    <li>eine Beschreibung</li>
+    <li>einen Button zum Ausführen</li>
+</ul>
+
+<p>
+    Beim Klick auf <strong>Ausführen</strong> wird der entsprechende Artisan Command direkt im Backend gestartet.
+    Während der Ausführung wird der Button deaktiviert, um parallele Starts zu verhindern.
+</p>
+
+<h2>Ausgabeanzeige</h2>
+
+<p>
+    Nach dem Start erscheint automatisch ein Dialogfenster, das folgende Informationen enthält:
+</p>
+
+<ul>
+    <li><strong>gestarteter Befehl</strong></li>
+    <li><strong>Startzeitpunkt</strong></li>
+    <li><strong>Dauer</strong> der Ausführung</li>
+    <li><strong>Konsolenausgabe</strong> des Commands</li>
+</ul>
+
+<p>
+    Fehler werden ebenfalls direkt im Ausgabedialog angezeigt, einschliesslich der originalen Fehlermeldung.
+</p>
+
+<h2>Zweck</h2>
+
+<p>
+    Die Aufgabenplanung dient zur Überwachung, Diagnose und manuellen Kontrolle von automatisierten Prozessen.
+    Sie ermöglicht sowohl das Prüfen der nächsten geplanten Ausführung als auch das gezielte manuelle Ausführen
+    einzelner Tasks – beispielsweise zur Sofortaktualisierung von Daten.
+</p>

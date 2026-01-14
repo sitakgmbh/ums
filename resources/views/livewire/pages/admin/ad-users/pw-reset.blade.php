@@ -1,7 +1,7 @@
 <div class="alert alert-info mb-3">
 
     <div class="mb-1">
-        <strong>Bitte Benutzerinformationen verifizieren, bevor ein Passwort zurückgesetzt wird!</strong>
+        <strong>Bitte verifiziere die Benutzerinformationen, bevor du ein Passwort zurücksetzt!</strong>
     </div>
 
     @if($adUser->display_name)

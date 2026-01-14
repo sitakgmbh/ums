@@ -1,5 +1,5 @@
 {
-  "": {
+  "_": {
     "items": [
       {
         "routes": ["dashboard"],
@@ -30,12 +30,33 @@
       }
     ]
   },
+  "_2": {
+    "roles": ["admin"],
+    "items": [
+      {
+        "routes": ["admin.sap-export.index", "admin.sap-export.archive"],
+        "title": "SAP Export",
+		"page": "admin.sap-export",
+        "roles": ["admin"]
+      }
+    ]
+  },
   "Systemsteuerung": {
     "roles": ["admin"],
     "items": [
       {
         "routes": ["admin.settings"],
         "title": "Einstellungen",
+        "roles": ["admin"]
+      },
+      {
+        "routes": ["admin.tools.task-scheduler"],
+        "title": "Aufgabenplaner",
+        "roles": ["admin"]
+      },
+      {
+        "routes": ["admin.tools.mail-tool"],
+        "title": "Mail-Tool",
         "roles": ["admin"]
       },
       {
