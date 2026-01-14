@@ -92,46 +92,57 @@
                 @endif
 
 				<div class="mb-2">
-					<label class="form-label mb-1">Kürzel</label>
-					<input type="text"
-						   class="form-control"
-						   wire:model.defer="orbisUsername">
-				</div>
-
-				<div class="mb-2">
-					<label class="form-label mb-1">Neues Passwort</label>
+					<label class="form-label mb-1">Benutzername (KIS/ORBIT)</label>
 					<div class="input-group">
-						<input type="text" class="form-control"
-							   wire:model.defer="orbisPassword">
-						<button type="button" class="btn btn-primary"
-								wire:click="generateOrbisPassword">
-							<i class="mdi mdi-autorenew"></i>
+						<input type="text"
+							   class="form-control"
+							   wire:model.defer="orbisUsername">
+
+						<button type="button"
+								class="btn btn-secondary"
+								wire:click="searchOrbisUser"
+								title="Benutzer suchen">
+							<i class="mdi mdi-magnify"></i>
 						</button>
 					</div>
 				</div>
 
 
-				<div class="form-check mb-3">
-					<input id="orbisMustChange"
-						   type="checkbox"
-						   class="form-check-input"
-						   wire:model="orbisMustChange">
+				@if($orbisFound)
+					<div class="mb-2">
+						<label class="form-label mb-1">Neues Passwort (KIS/ORBIT)</label>
+						<div class="input-group">
+							<input type="text" class="form-control"
+								   wire:model.defer="orbisPassword">
+							<button type="button" class="btn btn-primary"
+									wire:click="generateOrbisPassword">
+								<i class="mdi mdi-autorenew"></i>
+							</button>
+						</div>
+					</div>
 
-					<label for="orbisMustChange" class="form-check-label">
-						@if($orbisMustChange)
-							'Passwort beim naechsten Login aendern' deaktivieren (aktiviert)
-						@else
-							'Passwort beim naechsten Login aendern' aktivieren (deaktiviert)
-						@endif
-					</label>
-				</div>
+					<div class="form-check mb-3">
+						<input id="orbisMustChange"
+							   type="checkbox"
+							   class="form-check-input"
+							   wire:model="orbisMustChange">
 
+						<label for="orbisMustChange" class="form-check-label">
+							@if($orbisMustChange)
+								'Passwort beim naechsten Login aendern' deaktivieren (aktiviert)
+							@else
+								'Passwort beim naechsten Login aendern' aktivieren (deaktiviert)
+							@endif
+						</label>
+					</div>
 
-                <button class="btn btn-primary"
-                        wire:click="saveOrbis"
-                        wire:loading.attr="disabled">
-                    Speichern
-                </button>
+					<button class="btn btn-primary"
+							wire:click="resetOrbisPassword"
+							wire:loading.attr="disabled">
+						Passwort setzen
+					</button>
+				@endif
+
 
             </div>
         </div>

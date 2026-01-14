@@ -28,6 +28,7 @@ class PwReset extends Component
     // ORBIS / KIS
     public string $orbisUsername = '';
     public string $orbisPassword = '';
+	public bool $orbisFound = false;
     public bool $orbisMustChange = false;
     public ?string $orbisError = null;
     public ?string $orbisSuccess = null;
@@ -86,6 +87,42 @@ class PwReset extends Component
 			$this->orbisError = "Exception: " . $e->getMessage();
 		}
 	}
+
+public function searchOrbisUser(): void
+{
+    $this->orbisError = null;
+    $this->orbisSuccess = null;
+
+    $username = strtoupper(trim($this->orbisUsername));
+
+    if ($username === '') {
+        $this->orbisError = 'Bitte zuerst einen Benutzernamen eingeben.';
+        return;
+    }
+
+    try {
+        $helper = app(\App\Services\Orbis\OrbisHelper::class);
+
+        $user = $helper->getUserByUsername($username);
+
+        if (!$user || empty($user['id'])) {
+            $this->orbisError = 'Benutzer in ORBIS nicht gefunden.';
+            $this->orbisFound = false;
+            return;
+        }
+
+        $this->orbisFound = true;
+
+        // optional Status laden
+        $this->orbisMustChange = (bool)($user['mustchangepassword'] ?? false);
+
+        $this->orbisSuccess = "Benutzer gefunden (ID {$user['id']})";
+
+    } catch (\Throwable $e) {
+        $this->orbisError = 'Exception: ' . $e->getMessage();
+        $this->orbisFound = false;
+    }
+}
 
 
     public function generateAdPassword(): void
