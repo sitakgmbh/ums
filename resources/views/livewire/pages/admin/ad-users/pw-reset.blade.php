@@ -23,6 +23,13 @@
         <div>Geburtsdatum: {{ $geburt->format('d.m.Y') }} ({{ $geburt->age }})</div>
     @endif
 
+@if($adUser->last_logon_date)
+    <div>
+        Letzte Anmeldung: {{ $adUser->last_logon_date->format('d.m.Y H:i') }} Uhr <span class="text-muted small">({{ $adUser->last_logon_date->diffForHumans() }})</span>
+    </div>
+@endif
+
+
     @if($adUser->sapExport)
         <div>
             Adresse: 

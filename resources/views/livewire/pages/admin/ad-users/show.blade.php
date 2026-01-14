@@ -2,7 +2,7 @@
 
 	@section("pageActions")
 		<a href="{{ route('admin.ad-users.pw-reset', $adUser->id) }}" class="btn btn-primary" title="Passwort ändern">
-			<i class="mdi mdi-lock"></i>
+			<i class="mdi mdi-key"></i>
 		</a>
 	@endsection
 
