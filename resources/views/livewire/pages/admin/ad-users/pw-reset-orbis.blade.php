@@ -14,7 +14,7 @@
         @endif
 
         <label class="form-label mb-1">Benutzername</label>
-        <div class="input-group mb-2">
+        <div class="input-group mb-0">
             <input type="text" class="form-control" wire:model.defer="orbisUsername">
             <button class="btn btn-primary" wire:click="searchOrbisUser" wire:loading.attr="disabled">
                 <i class="mdi mdi-magnify"></i>
@@ -24,7 +24,7 @@
         @if($orbisFound)
 
             <label class="form-label">Neues Passwort</label>
-            <div class="input-group mb-2">
+            <div class="input-group mt-2 mb-2">
                 <input type="text" class="form-control" wire:model.defer="orbisPassword">
                 <button class="btn btn-primary" wire:click="generateOrbisPassword">
                     <i class="mdi mdi-autorenew"></i>

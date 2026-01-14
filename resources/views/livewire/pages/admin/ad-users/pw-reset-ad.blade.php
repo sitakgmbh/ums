@@ -16,7 +16,7 @@
             @endif
 
             <div class="mb-2">
-                <label class="form-label mb-0">Benutzername</label>
+                <label class="form-label mb-1">Benutzername</label>
                 <input type="text"
                        class="form-control"
                        value="{{ $adUsername }}"
@@ -24,7 +24,7 @@
             </div>
 
             <div class="mb-2">
-                <label class="form-label mb-2">Neues Passwort</label>
+                <label class="form-label mb-1">Neues Passwort</label>
                 <div class="input-group">
                     <input type="text"
                            class="form-control"
