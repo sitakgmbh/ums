@@ -13,7 +13,7 @@
 					<script>document.write(new Date().getFullYear())</script> © PDGR ICT
 				</div>
 				<div class="col-md-6">
-					<div class="text-md-end footer-links d-none d-md-block">
+					<div class="text-md-end footer-links">
 						@php
 							$mode = \App\Models\Setting::getValue('show_help', 'off');
 							$routeName = request()->route()->getName();

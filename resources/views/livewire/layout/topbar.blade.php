@@ -43,7 +43,7 @@
 
             <!-- Testmodus-Badge -->
             @if (env('TEST_MODE', false))
-				<li class="d-none d-sm-inline-block">
+				<li class="d-inline-block">
 					<div class="badge bg-warning text-dark">Test-Modus aktiv</div>
 				</li>
             @endif
@@ -131,7 +131,7 @@
 
 
 			<!-- Theme Mode -->
-			<li class="d-none d-sm-inline-block">
+			<li class="d-inline-block">
 				<div class="nav-link cursor-pointer" wire:click="toggle">
 					<i class="ri-moon-line font-22"></i>
 				</div>
