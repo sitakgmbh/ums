@@ -1,60 +1,48 @@
+<div class="alert alert-info mb-3">
+
+    <div class="mb-1">
+        <strong>Bitte Benutzerinformationen verifizieren, bevor ein Passwort zurückgesetzt wird!</strong>
+    </div>
+
+    @if($adUser->display_name)
+        <div>Name: {{ $adUser->display_name }}</div>
+    @endif
+
+    @if($adUser->username)
+        <div>Benutzername: {{ $adUser->username }}</div>
+    @endif
+
+    @if($adUser->email)
+        <div>E-Mail: {{ $adUser->email }}</div>
+    @endif
+
+    @if($adUser->extensionattribute14)
+        @php
+            $geburt = \Carbon\Carbon::createFromFormat('Ymd', $adUser->extensionattribute14);
+        @endphp
+        <div>Geburtsdatum: {{ $geburt->format('d.m.Y') }} ({{ $geburt->age }})</div>
+    @endif
+
+    @if($adUser->sapExport)
+        <div>
+            Adresse: 
+            {{ $adUser->sapExport->d_adr1_stras ?? '' }},
+            {{ $adUser->sapExport->d_adr1_pstlz ?? '' }}
+            {{ $adUser->sapExport->d_adr1_ort01 ?? '' }}
+        </div>
+    @endif
+
+</div>
+
+
 <div class="row">
 
-    <!-- LINKS: AD -->
-    <div class="col-md-6">
+    <div class="col-12 col-md-6">
         <livewire:pages.admin.ad-users.pw-reset-ad :adUser="$adUser" />
     </div>
 
-    <!-- RECHTS: ORBIS / KIS -->
-    <div class="col-md-6">
+    <div class="col-12 col-md-6">
         <livewire:pages.admin.ad-users.pw-reset-orbis :adUser="$adUser" />
-    </div>
-
-    <!-- VERIFIKATION darunter -->
-    <div class="col-md-6 mt-3">
-        <div class="card mb-3">
-            <div class="card-header text-white bg-primary py-1">
-                <strong>Verifikation</strong>
-            </div>
-            <div class="card-body">
-
-                <dl class="row mb-2">
-                    <dt class="col-4">Vorname</dt>
-                    <dd class="col-8">{{ $adUser->firstname ?? '—' }}</dd>
-
-                    <dt class="col-4">Nachname</dt>
-                    <dd class="col-8">{{ $adUser->lastname ?? '—' }}</dd>
-
-                    <dt class="col-4">E-Mail</dt>
-                    <dd class="col-8">{{ $adUser->email ?? '—' }}</dd>
-
-                    <dt class="col-4">Geburtsdatum</dt>
-                    <dd class="col-8">
-                        @if($adUser->extensionattribute14)
-                            @php
-                                $geburt = \Carbon\Carbon::createFromFormat('Ymd', $adUser->extensionattribute14);
-                                $alter = $geburt->age;
-                            @endphp
-                            {{ $geburt->format('d.m.Y') }} ({{ $alter }})
-                        @else
-                            —
-                        @endif
-                    </dd>
-                </dl>
-
-                @if ($adUser->sapExport)
-                    <dl class="row mb-0 mt-3">
-                        <dt class="col-4">Private Adresse</dt>
-                        <dd class="col-8">
-                            {{ $adUser->sapExport->d_adr1_stras ?? '—' }}
-                            <br>
-                            {{ $adUser->sapExport->d_adr1_pstlz ?? '' }} {{ $adUser->sapExport->d_adr1_ort01 ?? '' }}
-                        </dd>
-                    </dl>
-                @endif
-
-            </div>
-        </div>
     </div>
 
 </div>
