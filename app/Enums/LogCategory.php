@@ -12,6 +12,7 @@ enum LogCategory: string
 	case Ad = "ad";
 	case Antraege = "antraege";
 	case Sap = "sap";
+	case Orbis = "orbis";
 	case Otobo = "otobo";
 	case MyPdgr = "mypdgr";
 	case Graph = "graph";
@@ -26,6 +27,7 @@ enum LogCategory: string
             self::Api => "API",
 			self::Email => "E-Mail",
 			self::Sap => "SAP",
+			self::Orbis => "KIS (ORBIS)",
 			self::Antraege => "Anträge",
 			self::Otobo => "Otobo",
 			self::MyPdgr => "MyPDGR",

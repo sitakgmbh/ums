@@ -6,6 +6,7 @@ use App\Models\AdUser;
 use Livewire\Component;
 use App\Services\Orbis\OrbisHelper;
 use App\Utils\UserHelper;
+use App\Utils\Logging\Logger;
 
 class PwResetOrbis extends Component
 {
@@ -95,33 +96,71 @@ class PwResetOrbis extends Component
             return;
         }
 
-        try 
+		try 
 		{
-            $helper = app(OrbisHelper::class);
+			$helper = app(OrbisHelper::class);
 
-            $ok = $helper->resetUserPw(
-                $this->orbisUser['id'],
-                $this->orbisPassword,
-                $this->orbisLockedPending,
-                $this->orbisMustChangePending
-            );
+			$ok = $helper->resetUserPw(
+				$this->orbisUser['id'],
+				$this->orbisPassword,
+				$this->orbisLockedPending,
+				$this->orbisMustChangePending
+			);
 
-            if (!$ok) 
+			if (!$ok) 
 			{
-                $this->orbisError = 'Fehler beim Speichern der Änderungen.';
-                return;
-            }
+				$this->orbisError = 'Fehler beim Speichern der Änderungen.';
 
-            $this->orbisSuccess = 'Änderungen erfolgreich gespeichert.';
-            $this->orbisPassword = '';
+				Logger::db("orbis", "error", "Passwort-Änderung '{$this->orbisUsername}' fehlgeschlagen", [
+					"user_id" => $this->orbisUser['id'],
+					"pw_set"  => trim($this->orbisPassword) !== '' ? true : null,
+					"locked"  => $this->orbisLockedPending ? true : null,
+					"must_pwd"=> $this->orbisMustChangePending ? true : null,
+					"actor"   => auth()->user()?->username ?? null,
+					"ip"      => request()->ip(),
+					"agent"   => request()->userAgent() ?: null,
+				]);
 
-            $this->searchOrbisUser();
+				return;
+			}
 
-        } 
+			$payload = [
+				"user_id" => $this->orbisUser['id'],
+				"pw_set"  => trim($this->orbisPassword) !== '' ? true : null,
+				"locked"  => $this->orbisLockedPending ? true : null,
+				"must_pwd"=> $this->orbisMustChangePending ? true : null,
+				"actor"   => auth()->user()?->username ?? null,
+				"ip"      => request()->ip(),
+			];
+
+			$agent = request()->userAgent();
+			
+			if ($agent) 
+			{
+				$payload["agent"] = substr($agent, 0, 200);
+			}
+
+			Logger::db("orbis", "info", "Passwort-Änderung '{$this->orbisUsername}' erfolgreich", $payload);
+
+			$this->orbisSuccess = 'Änderungen erfolgreich gespeichert.';
+			$this->orbisPassword = '';
+
+			$this->searchOrbisUser();
+
+		} 
 		catch (\Throwable $e) 
 		{
-            $this->orbisError = "Exception: {$e->getMessage()}";
-        }
+
+			Logger::db("orbis", "error", "Passwort-Änderung '{$this->orbisUsername}' fehlgeschlagen", [
+				"user_id" => $this->orbisUser['id'] ?? null,
+				"actor"   => auth()->user()?->username ?? null,
+				"ip"      => request()->ip(),
+				"agent"   => request()->userAgent() ?: null,
+				"error"   => $e->getMessage(),
+			]);
+
+			$this->orbisError = "Exception: {$e->getMessage()}";
+		}
     }
 
     public function render()

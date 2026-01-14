@@ -22,7 +22,7 @@ class PwReset extends Component
 
         return view('livewire.pages.admin.ad-users.pw-reset', compact('ad'))
             ->layoutData([
-                'pageTitle' => 'Account ' . ($ad->display_name ?? $ad->username)
+                'pageTitle' => 'Passwort-Änderung ' . ($ad->display_name ?? $ad->username)
             ]);
     }
 }
