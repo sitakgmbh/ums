@@ -86,13 +86,13 @@ class MailTool extends Component
         }
 
         $this->models = [
-            'eroeffnungen' => Eroeffnung::where('archiviert', false)->get()
+            'eroeffnungen' => Eroeffnung::get()
                 ->map(fn ($e) => [
                     'id' => $e->id,
                     'label' => "Eroeffnung {$e->id} ({$e->nachname} {$e->vorname})"
                 ])->toArray(),
 
-            'mutationen' => Mutation::where('archiviert', false)->get()
+            'mutationen' => Mutation::get()
                 ->map(fn ($m) => [
                     'id' => $m->id,
                     'label' => "Mutation {$m->id} (" . ($m->adUser->display_name ?? 'Unbekannt') . ")",
