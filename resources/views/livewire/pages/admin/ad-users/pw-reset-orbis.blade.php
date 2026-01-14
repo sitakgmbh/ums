@@ -19,12 +19,12 @@
                            wire:model.defer="orbisUsername">
                     <button class="btn btn-primary"
                             wire:click="searchOrbisUser"
-                            wire:loading.attr="disabled"
-                            wire:target="searchOrbisUser">
+                            wire:loading.attr="disabled">
                         <i class="mdi mdi-magnify"></i>
                     </button>
                 </div>
             </div>
+
 
             @if($orbisFound)
 
@@ -64,6 +64,7 @@
                         <input type="text"
                                class="form-control"
                                wire:model.defer="orbisPassword">
+
                         <button type="button"
                                 class="btn btn-primary"
                                 wire:click="generateOrbisPassword">
@@ -74,11 +75,12 @@
 
                 <button class="btn btn-primary"
                         wire:click="saveOrbis"
-                        wire:loading.attr="disabled"
-                        wire:target="saveOrbis">
+                        wire:loading.attr="disabled">
+
                     <span wire:loading.remove wire:target="saveOrbis">
                         Speichern
                     </span>
+
                     <span wire:loading wire:target="saveOrbis">
                         <span class="spinner-border spinner-border-sm me-1"></span>
                         bitte warten…
@@ -86,8 +88,6 @@
                 </button>
 
             @endif
-
         </div>
     </div>
-
 </div>

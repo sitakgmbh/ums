@@ -854,6 +854,16 @@ class OrbisHelper
 		return is_array($response);
 	}
 
+public function updateUserPayload(array $payload): bool
+{
+    $resp = $this->client->send(
+        $this->client->getBaseUrl() . "/resources/external/users",
+        "PUT",
+        $payload
+    );
+
+    return is_array($resp);
+}
 
 
 
