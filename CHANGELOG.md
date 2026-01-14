@@ -8,9 +8,15 @@ Alle Änderungen an diesem Projekt werden in diesem Dokument festgehalten.
 
 #### Neuigkeiten
 - Die Seite ***SAP Export*** wurde hinzugefügt, welche den aktuellen SAP Export aus der Datenbank darstellt. Zudem können archivierte SAP Exporte als Tabelle angezeigt oder heruntergeladen werden.
+- Über die Detailseite eines Active Directory Benutzers kann nun eine Seite zum Ändern von Passwörtern in AD und KIS erreicht werden.
 
 #### Änderungen
-- Der Task ***check:sap-ad-mappings*** prüft nur noch vorhandene AD-Benutzer (is_exisiting = true), da es vorkommt, dass AD-Benutzer erstellt, gelöscht und nochmals erstellt werden.
+- Wenn eine Eröffnung erstellt wird, ist die Option ***Telefonie*** standardmässig aktiv, da meistens vergessen wurde, eine Telefonnummer zu hinterlegen. Die Option ***Unpersönliche Telefonummer*** ist vorausgewählt.
+- Im Auftrag ***Verarbeitung KIS*** wird nun ein Hinweis bzgl. 'TVER' angezeigt.
+- Das Mail-Tool zeigt nun auch archivierte Anträge an.
+
+#### Bugfixes
+- Vorname und Nachname wurden beim Erstellen einer Eröffnung nicht getrimmt, was vereinzelt zu überflüssigen Leerzeichen führte.
 
 ## [1.1.3] – 05.01.2025
 
