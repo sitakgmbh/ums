@@ -753,118 +753,53 @@ class OrbisHelper
 		);
 	}
 
-
-	public function resetUserPassword(int $userId, string $username, string $newPassword, bool $mustChange = false): bool
+	public function resetUserPw(int $userId, string $newPassword, bool $locked, bool $mustChange): bool
 	{
-		$username = strtoupper($username);
-
-		// 1. User lesen (Pflicht für vollständiges PUT-Payload)
 		$existing = $this->client->send(
-			$this->client->getBaseUrl() . "/resources/external/users?name=" . urlencode($username)
+			$this->client->getBaseUrl() . "/resources/external/users/{$userId}"
 		);
 
-		$user = $existing['user'][0] ?? null;
-
-		if (!$user || empty($user['id'])) {
-			Logger::error("ORBIS: resetUserPassword(): User {$username} nicht gefunden");
+		if (!is_array($existing) || empty($existing['id'])) 
+		{
+			Logger::error("User {$userId} nicht gefunden.");
 			return false;
 		}
 
-		// 2. Pflichtfelder aus vorhandener Ressource erzeugen
 		$payload = [
-			"id"   => $user['id'],
-			"name" => $user['name'],
-			"validityperiod" => $user["validityperiod"], // Muss vorhanden sein
-			"canceled" => $user["canceled"] ?? false,
-			"locked"   => $user["locked"] ?? false,
+			'id' => $existing['id'],
+			'name' => $existing['name'],
+			'validityperiod' => $existing['validityperiod'],
+			'canceled' => $existing['canceled'] ?? false,
+			'locked' => $locked,
+			'mustchangepassword' => $mustChange,
+			'password' => base64_encode($newPassword)
 		];
 
-		// 3. Passwort + mustChange setzen
-		$payload["password"] = base64_encode($newPassword);
-		$payload["mustchangepassword"] = $mustChange;
-
-		// 4. PUT senden
-		$response = $this->client->send(
+		$resp = $this->client->send(
 			$this->client->getBaseUrl() . "/resources/external/users",
 			"PUT",
 			$payload
 		);
 
-		if (!is_array($response)) {
-			Logger::error("ORBIS resetUserPassword() PUT fehlgeschlagen");
+		if ($resp === null) 
+		{
+			Logger::error("Keine Antwort erhalten.");
+			return false;
+		}
+
+		if (isset($resp['propertyViolations']) || isset($resp['classViolations']) || isset($resp['parameterViolations'])) 
+		{
+			Logger::error("Validation Fehler " . json_encode($resp));
+			return false;
+		}
+
+		if (isset($resp['error']) || isset($resp['Errors']) || isset($resp['message'])) 
+		{
+			Logger::error("Sonstiger Fehler " . json_encode($resp));
 			return false;
 		}
 
 		return true;
 	}
-
-	public function lockUser(int $userId): bool
-	{
-		$existing = $this->client->send(
-			$this->client->getBaseUrl() . "/resources/external/users/{$userId}"
-		);
-
-		if (!is_array($existing) || empty($existing['id'])) {
-			Logger::error("ORBIS lockUser(): User {$userId} nicht gefunden");
-			return false;
-		}
-
-		$payload = [
-			'id'   => $existing['id'],
-			'name' => $existing['name'],
-			'validityperiod' => $existing['validityperiod'],
-			'canceled' => $existing['canceled'] ?? false,
-			'locked'   => true,
-		];
-
-		$response = $this->client->send(
-			$this->client->getBaseUrl() . "/resources/external/users",
-			"PUT",
-			$payload
-		);
-
-		return is_array($response);
-	}
-
-	public function unlockUser(int $userId): bool
-	{
-		$existing = $this->client->send(
-			$this->client->getBaseUrl() . "/resources/external/users/{$userId}"
-		);
-
-		if (!is_array($existing) || empty($existing['id'])) {
-			Logger::error("ORBIS unlockUser(): User {$userId} nicht gefunden");
-			return false;
-		}
-
-		$payload = [
-			'id'   => $existing['id'],
-			'name' => $existing['name'],
-			'validityperiod' => $existing['validityperiod'],
-			'canceled' => $existing['canceled'] ?? false,
-			'locked'   => false,
-		];
-
-		$response = $this->client->send(
-			$this->client->getBaseUrl() . "/resources/external/users",
-			"PUT",
-			$payload
-		);
-
-		return is_array($response);
-	}
-
-public function updateUserPayload(array $payload): bool
-{
-    $resp = $this->client->send(
-        $this->client->getBaseUrl() . "/resources/external/users",
-        "PUT",
-        $payload
-    );
-
-    return is_array($resp);
-}
-
-
 
 }

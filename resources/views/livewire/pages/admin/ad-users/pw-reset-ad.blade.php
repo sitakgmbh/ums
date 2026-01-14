@@ -1,6 +1,6 @@
 <div>
 
-    <div class="card mb-3">
+    <div class="card">
         <div class="card-header text-white bg-primary py-1">
             <strong>Active Directory</strong>
         </div>

@@ -15,51 +15,64 @@ class PwResetOrbis extends Component
     public string $orbisPassword = '';
 
     public bool $orbisFound = false;
-    public bool $orbisLocked = false;
-    public bool $orbisMustChange = false;
+
+    // API Current State
+    public bool $orbisLockedCurrent = false;
+    public bool $orbisMustChangeCurrent = false;
+
+    // Radio Pending State
+    public bool $orbisLockedPending = false;
+    public bool $orbisMustChangePending = false;
 
     public ?array $orbisUser = null;
-    public ?string $orbisError = null;
 
-    public function mount(AdUser $adUser): void
+    public ?string $orbisError = null;
+    public ?string $orbisSuccess = null;
+
+    public function mount(AdUser $adUser)
     {
         $this->adUser = $adUser;
         $this->orbisUsername = strtoupper($adUser->username);
-
         $this->searchOrbisUser();
     }
 
-    public function searchOrbisUser(): void
-    {
-        $this->orbisError = null;
-        $this->orbisFound = false;
-        $this->orbisUser = null;
+	public function searchOrbisUser(): void
+	{
+		// Erfolg/Fehler hier NICHT mehr löschen!
+		// $this->orbisError = null;
+		// $this->orbisSuccess = null;
 
-        $username = strtoupper(trim($this->orbisUsername));
-        if ($username === '') {
-            $this->orbisError = 'Bitte ORBIS Benutzername eingeben.';
-            return;
-        }
+		$this->orbisFound = false;
 
-        try {
-            $helper = app(OrbisHelper::class);
-            $result = $helper->getUserByUsername($username);
+		$username = strtoupper(trim($this->orbisUsername));
+		if ($username === '') {
+			$this->orbisError = 'Bitte ORBIS Benutzername eingeben.';
+			return;
+		}
 
-            if (!$result || empty($result['id'])) {
-                $this->orbisError = 'Benutzer in ORBIS nicht gefunden.';
-                return;
-            }
+		try {
+			$helper = app(OrbisHelper::class);
+			$result = $helper->getUserByUsername($username);
 
-            $this->orbisUser = $result;
-            $this->orbisFound = true;
+			if (!$result || empty($result['id'])) {
+				$this->orbisError = 'Benutzer in ORBIS nicht gefunden.';
+				return;
+			}
 
-            $this->orbisLocked = (bool)($result['locked'] ?? false);
-            $this->orbisMustChange = (bool)($result['mustchangepassword'] ?? false);
+			$this->orbisFound = true;
+			$this->orbisUser = $result;
 
-        } catch (\Throwable $e) {
-            $this->orbisError = 'Exception: ' . $e->getMessage();
-        }
-    }
+			$this->orbisLockedCurrent = (bool)($result['locked'] ?? false);
+			$this->orbisMustChangeCurrent = (bool)($result['mustchangepassword'] ?? false);
+
+			$this->orbisLockedPending = $this->orbisLockedCurrent;
+			$this->orbisMustChangePending = $this->orbisMustChangeCurrent;
+
+		} catch (\Throwable $e) {
+			$this->orbisError = "Exception: {$e->getMessage()}";
+		}
+	}
+
 
     public function generateOrbisPassword(): void
     {
@@ -69,6 +82,7 @@ class PwResetOrbis extends Component
     public function saveOrbis(): void
     {
         $this->orbisError = null;
+        $this->orbisSuccess = null;
 
         if (!$this->orbisFound || !$this->orbisUser) {
             $this->orbisError = 'Bitte zuerst Benutzer suchen.';
@@ -83,29 +97,25 @@ class PwResetOrbis extends Component
         try {
             $helper = app(OrbisHelper::class);
 
-            $payload = [
-                'id' => $this->orbisUser['id'],
-                'name' => $this->orbisUser['name'],
-                'validityperiod' => $this->orbisUser['validityperiod'],
-                'canceled' => $this->orbisUser['canceled'] ?? false,
-                'locked' => $this->orbisLocked,
-                'mustchangepassword' => $this->orbisMustChange,
-                'password' => base64_encode($this->orbisPassword)
-            ];
+            $ok = $helper->resetUserPw(
+                $this->orbisUser['id'],
+                $this->orbisPassword,
+                $this->orbisLockedPending,
+                $this->orbisMustChangePending
+            );
 
-            $resp = $helper->updateUserPayload($payload);
-
-            if (!$resp) {
+            if (!$ok) {
                 $this->orbisError = 'Fehler beim Speichern in ORBIS.';
                 return;
             }
 
-            // UI refresh
+            $this->orbisSuccess = 'Einstellungen in ORBIS gespeichert.';
             $this->orbisPassword = '';
+
             $this->searchOrbisUser();
 
         } catch (\Throwable $e) {
-            $this->orbisError = 'Exception: ' . $e->getMessage();
+            $this->orbisError = "Exception: {$e->getMessage()}";
         }
     }
 
