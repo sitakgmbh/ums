@@ -16,7 +16,7 @@
         <div>E-Mail: {{ $adUser->email }}</div>
     @endif
 
-    @if($adUser->extensionattribute14)
+    @if($adUser->extensionattribute2)
         @php
             $geburt = \Carbon\Carbon::createFromFormat('Ymd', $adUser->extensionattribute2);
         @endphp
