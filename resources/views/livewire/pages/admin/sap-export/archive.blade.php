@@ -9,7 +9,7 @@
 				<div class="col-12 col-sm-auto">
 					<select wire:model="selectedVersion"
 							class="form-select form-select-sm">
-						<option value="">Version auswählen...</option>
+						<option value="">Version auswählen…</option>
 						@foreach($versions as $v)
 							<option value="{{ $v }}">{{ $v }}</option>
 						@endforeach
@@ -23,7 +23,7 @@
 							wire:loading.attr="disabled"
 							wire:target="loadVersion">
 						<span wire:loading.remove wire:target="loadVersion">Laden</span>
-						<span wire:loading wire:target="loadVersion">Bitte warten...</span>
+						<span wire:loading wire:target="loadVersion">Bitte warten…</span>
 					</button>
 				</div>
 
@@ -39,12 +39,28 @@
 					</div>
 
 					<!-- Suche -->
-					<div class="col-12 col-sm-auto">
+					<div class="col-12 col-sm-auto d-flex align-items-center gap-2">
+
 						<input id="archive-search"
 							   type="text"
 							   class="form-control form-control-sm"
-							   placeholder="Suchen...">
+							   placeholder="Suchbegriff…">
+
+						<button type="button"
+								id="archive-search-btn"
+								data-search
+								class="btn btn-sm btn-primary">
+							Suchen
+						</button>
+
+						<button type="button"
+								id="archive-reset-btn"
+								data-reset
+								class="btn btn-sm btn-light">
+							Reset
+						</button>
 					</div>
+
 
 				@endif
 
@@ -73,7 +89,11 @@
 					</table>
 				</div>
 
-				<div class="text-muted small mt-2">{{ count($rows) }} Einträge</div>
+				<div id="archive-count" class="text-muted small mt-2">
+					{{ count($rows) }} Einträge
+				</div>
+
+
 			@endif
 
 			@if($selectedVersion && empty($rows))
@@ -85,61 +105,108 @@
 
 </div>
 
-<style>
-#archive-table thead th {
-    position: sticky;
-    top: 0;
-    background: var(--bs-body-bg, #fff);
-    z-index: 2;
-}
-</style>
 
+@push('scripts')
 <script>
-document.addEventListener('input', function(e) {
-    if (e.target.id !== 'archive-search') return;
+(function() {
 
-    const normalize = s =>
-        s.toLowerCase()
-         .normalize('NFD')
-         .replace(/[\u0300-\u036f]/g, '')
-         .replace(/ß/g, 'ss');
+    function normalize(s) {
+        return s.toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/ß/g, 'ss');
+    }
 
-    const term = normalize(e.target.value);
-    const rows = document.querySelectorAll('#archive-table tbody tr');
+    function updateCount() {
+        const all = document.querySelectorAll('#archive-table tbody tr').length;
+        const visible = Array.from(document.querySelectorAll('#archive-table tbody tr'))
+            .filter(r => r.style.display !== 'none').length;
 
-    rows.forEach(row => {
-        const text = normalize(row.innerText);
-        row.style.display = text.includes(term) ? '' : 'none';
-    });
-});
+        const el = document.getElementById('archive-count');
+        if (!el) return;
 
-function sortTable(table, colIndex, asc) {
-    const tbody = table.tBodies[0];
-    const rows = Array.from(tbody.querySelectorAll("tr"));
-
-    rows.sort((a, b) => {
-        const x = a.children[colIndex].innerText.toLowerCase();
-        const y = b.children[colIndex].innerText.toLowerCase();
-
-        if (!isNaN(x) && !isNaN(y)) {
-            return asc ? x - y : y - x;
+        if (visible === all) {
+            el.textContent = `${all} Einträge`;
+        } else {
+            el.textContent = `${visible} / ${all} Einträge`;
         }
-        return asc ? x.localeCompare(y) : y.localeCompare(x);
+    }
+
+    function runSearch() {
+        const input = document.getElementById('archive-search');
+        if (!input) return;
+
+        const term = normalize(input.value);
+        const rows = document.querySelectorAll('#archive-table tbody tr');
+
+        rows.forEach(row => {
+            const text = normalize(row.innerText);
+            row.style.display = text.includes(term) ? '' : 'none';
+        });
+
+        updateCount();
+    }
+
+    function resetSearch() {
+        const input = document.getElementById('archive-search');
+        if (!input) return;
+
+        input.value = '';
+        document.querySelectorAll('#archive-table tbody tr')
+            .forEach(r => r.style.display = '');
+
+        updateCount();
+    }
+
+    // Delegierte Buttons
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('[data-search]')) {
+            runSearch();
+        }
+        if (e.target.closest('[data-reset]')) {
+            resetSearch();
+        }
     });
 
-    rows.forEach(r => tbody.appendChild(r));
-}
+    // Enter im Feld
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        if (document.activeElement?.id === 'archive-search') {
+            runSearch();
+        }
+    });
 
-document.addEventListener("click", function(e) {
-    if (!e.target.matches("#archive-table thead th")) return;
+    // Sortieren
+    document.addEventListener('click', (e) => {
+        const th = e.target.closest('#archive-table thead th');
+        if (!th) return;
 
-    const th = e.target;
-    const table = th.closest("table");
-    const index = Array.from(th.parentNode.children).indexOf(th);
+        const table = th.closest('table');
+        const index = Array.from(th.parentNode.children).indexOf(th);
+        const asc = !(th.dataset.asc === "true");
+        th.dataset.asc = asc;
 
-    const asc = !(th.dataset.asc === "true");
-    th.dataset.asc = asc;
+        sortTable(table, index, asc);
+        updateCount();
+    });
 
-    sortTable(table, index, asc);
-});
+    function sortTable(table, colIndex, asc) {
+        const tbody = table.tBodies[0];
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort((a, b) => {
+            const x = a.children[colIndex].innerText.toLowerCase();
+            const y = b.children[colIndex].innerText.toLowerCase();
+
+            if (!isNaN(x) && !isNaN(y)) {
+                return asc ? x - y : y - x;
+            }
+            return asc ? x.localeCompare(y) : y.localeCompare(x);
+        });
+
+        rows.forEach(r => tbody.appendChild(r));
+    }
+
+})();
 </script>
+@endpush
