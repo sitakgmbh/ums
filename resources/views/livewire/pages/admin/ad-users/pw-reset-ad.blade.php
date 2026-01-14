@@ -72,10 +72,10 @@
                        wire:model="adTogglePwdChange">
                 <label for="adTogglePwdChange" class="form-check-label">
                     @if($adRequiresPwdChange)
-                        'Passwort beim naechsten Login aendern' deaktivieren
+                        'Passwort beim nächsten Login ändern' deaktivieren
                         <span class="text-muted small">(aktiviert)</span>
                     @else
-                        'Passwort beim naechsten Login aendern' aktivieren
+                        'Passwort beim nächsten Login ändern' aktivieren
                         <span class="text-muted small">(deaktiviert)</span>
                     @endif
                 </label>
@@ -92,7 +92,7 @@
 
                 <span wire:loading wire:target="saveAd">
                     <span class="spinner-border spinner-border-sm me-1"></span>
-                    bitte warten…
+                    Bitte warten…
                 </span>
             </button>
 

@@ -1,0 +1,116 @@
+<h1>Active-Directory Benutzerübersicht</h1>
+
+<p>
+    Diese Seite zeigt alle im System bekannten Active-Directory Benutzer in Tabellenform an.
+    Über Filter, Suche und Aktionen können Datensätze eingegrenzt, analysiert und exportiert werden.
+</p>
+
+<h2>Tabelle</h2>
+
+<p>
+    Die Tabelle stellt grundlegende Identifikationsdaten sowie Statusinformationen dar.
+    Die folgenden Spalten werden angezeigt:
+</p>
+
+<ul>
+    <li><strong>Anzeigename</strong> – kombinierter Anzeigename des Benutzers.</li>
+    <li><strong>Vorname</strong> / <strong>Nachname</strong> – Stammdaten aus dem AD.</li>
+    <li><strong>Benutzername</strong> – Kürzel des AD-Kontos.</li>
+    <li><strong>Account-Status</strong> – zeigt, ob das Konto aktiviert oder deaktiviert ist.</li>
+    <li><strong>AD-Status</strong> – zeigt, ob der Benutzer im AD vorhanden oder gelöscht wurde.</li>
+    <li><strong>Aktionen</strong> – ermöglicht den Aufruf der Detailansicht.</li>
+</ul>
+
+<h3>Sortierung</h3>
+<p>
+    Die Tabelle kann über klickbare Spalten sortiert werden. Standardmäßig wird nach dem Anzeigenamen
+    aufsteigend sortiert.
+</p>
+
+<h3>Suche</h3>
+<p>
+    Über das Suchfeld können Benutzer nach Name oder Benutzername gefiltert werden. Die Suche erfolgt
+    in folgenden Feldern:
+</p>
+
+<ul>
+    <li>Anzeigename</li>
+    <li>Vorname</li>
+    <li>Nachname</li>
+    <li>Benutzername</li>
+</ul>
+
+<h3>Filter</h3>
+<p>
+    Zusätzlich zur Suche stehen spezielle Filter zur Verfügung:
+</p>
+
+<ul>
+    <li><strong>Deaktivierte Benutzer anzeigen/ausblenden</strong> – betrifft den Account-Status.</li>
+    <li><strong>Gelöschte Benutzer anzeigen/ausblenden</strong> – blendet im AD nicht mehr vorhandene Konten aus.</li>
+</ul>
+
+<p>
+    Änderungen an den Filtern aktualisieren die Tabelle unmittelbar.
+</p>
+
+<h3>Export</h3>
+<p>
+    Über <strong>Export CSV</strong> kann der aktuelle Tabellenstand in eine CSV-Datei exportiert werden.
+    Dabei werden die aktuell sichtbaren Daten berücksichtigt.
+</p>
+
+<h2>Detailansicht</h2>
+
+<p>
+    Über die Aktion <i class="mdi mdi-eye"></i> kann ein Benutzer geöffnet werden.
+    In der Detailansicht stehen zusätzliche Funktionen wie Passwort-Reset oder Statusänderungen zur Verfügung.
+</p>
+
+<h2>Modale Fenster</h2>
+
+<p>
+    Die Übersichtsseite verfügt über zusätzliche Analysefunktionen, die situationsbezogen über Modalfenster
+    dargestellt werden.
+</p>
+
+<h3>Geburtstage</h3>
+
+<p>
+    Das Modal <strong>Geburtstage</strong> zeigt Benutzer mit anstehenden Geburtstagen an.
+    Es stehen folgende Filter zur Verfügung:
+</p>
+
+<ul>
+    <li><strong>Heute</strong> – Benutzer, die genau heute Geburtstag haben.</li>
+    <li><strong>Diese Woche</strong> – Benutzer mit Geburtstag innerhalb der nächsten 7 Tage.</li>
+    <li><strong>Diesen Monat</strong> – Benutzer im aktuellen Monat.</li>
+</ul>
+
+<p>
+    Angezeigt werden Name, Geburtstag und verbleibende Tage bis zum nächsten Termin.
+</p>
+
+<h3>SAP ↔ AD Matching</h3>
+
+<p>
+    Das Modal <strong>SAP ↔ AD</strong> stellt einen Abgleich der Personalinformationen zwischen SAP und Active Directory dar.
+    Über die Filter können Unstimmigkeiten selektiv analysiert werden:
+</p>
+
+<ul>
+    <li><strong>Keine Personalnummer</strong> – AD-Benutzer ohne verknüpfte Personalnummer.</li>
+    <li><strong>Kein SAP Eintrag</strong> – Personalnummer existiert im AD, aber nicht im SAP.</li>
+    <li><strong>Kein AD Benutzer</strong> – Eintrag in SAP ohne entsprechendes AD-Konto.</li>
+</ul>
+
+<p>
+    Das Modal dient zur Überwachung der Datenqualität und zur Klärung von Zuordnungsproblemen.
+</p>
+
+<h2>Zweck</h2>
+
+<p>
+    Die Übersicht dient als zentrale Verwaltungs- und Kontrollstelle für AD-Benutzerkonten und
+    unterstützt sowohl administrative Tätigkeiten als auch Plausibilitätskontrollen gegen SAP und KIS.
+</p>

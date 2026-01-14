@@ -7,6 +7,29 @@
       }
     ]
   },
+  "Active Directory Benutzer": {
+    "roles": ["admin"],
+    "items": [
+      {
+        "routes": ["admin.ad-users.index"],
+        "title": "Übersicht",
+		"page": "admin.ad-users.index",
+        "roles": ["admin"]
+      },
+      {
+        "routes": ["admin.ad-users.show"],
+        "title": "Benutzerdetails",
+		"page": "admin.ad-users.show",
+        "roles": ["admin"]
+      },
+      {
+        "routes": ["admin.ad-users.pw-reset"],
+        "title": "Passwort ändern",
+		"page": "admin.ad-users.pw-reset",
+        "roles": ["admin"]
+      }
+    ]
+  },
   "Systemsteuerung": {
     "roles": ["admin"],
     "items": [
@@ -18,7 +41,7 @@
       {
         "routes": ["admin.logs.index", "admin.logfiles.index"],
         "title": "Logs",
-		"page": "admin.logs.index",
+		"page": "admin.logs",
         "roles": ["admin"]
       },
       {

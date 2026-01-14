@@ -1,0 +1,98 @@
+<h1>AD-Benutzerdetails</h1>
+
+<p>
+    Diese Detailansicht zeigt Stammdaten, Kontoinformationen und administrative Attribute eines Active-Directory Benutzers.
+    Über die Tabs können verschiedene Datenbereiche eingesehen werden.
+</p>
+
+<h2>Aktionen</h2>
+
+<p>
+    Oben rechts befindet sich die Aktion <strong>Passwort ändern</strong>.
+    Darüber kann das Passwort im AD zurückgesetzt werden. Dies öffnet die entsprechende Seite zum Passwort-Reset.
+</p>
+
+<h2>Stammdaten</h2>
+
+<p>
+    Auf der linken Seite befinden sich grundlegende Informationen zum Benutzer:
+</p>
+
+<ul>
+    <li>Profilbild</li>
+    <li>Anrede, Titel, Vorname, Nachname</li>
+    <li>Funktion und organisatorische Zuordnung (UE, Abteilung, Arbeitsort)</li>
+    <li>E-Mail und Telefonnummer</li>
+</ul>
+
+<p>
+    Der Button <strong>Zurück</strong> führt zur AD-Benutzerübersicht.
+</p>
+
+<h2>Tabs</h2>
+
+<p>
+    Auf der rechten Seite befinden sich mehrere Reiter zur strukturierten Anzeige technischer Daten:
+</p>
+
+<h3>Accountinformationen</h3>
+<p>
+    Dieser Tab zeigt kontorelevante Informationen aus dem Active Directory, unter anderem:
+</p>
+
+<ul>
+    <li>Benutzername</li>
+    <li>Letzte Anmeldung</li>
+    <li>Ablaufdatum des Kontos</li>
+    <li>Passwort zuletzt geändert</li>
+    <li>Fehlgeschlagene Anmeldungen</li>
+    <li>Anzahl der Anmeldungen</li>
+    <li>Konto aktiviert/deaktiviert</li>
+    <li>Passwort läuft nie ab</li>
+</ul>
+
+<h3>Gruppenmitgliedschaften</h3>
+<p>
+    Zeigt alle AD-Gruppen, in denen der Benutzer Mitglied ist. Falls keine Mitgliedschaften vorhanden sind,
+    erscheint ein entsprechender Hinweis.
+</p>
+
+<h3>Extension Attributes</h3>
+<p>
+    Hier werden die im AD hinterlegten Erweiterungsattribute (<code>extensionAttribute1</code> bis
+    <code>extensionAttribute15</code>) angezeigt. Diese Felder dienen in vielen Umgebungen für systemische oder
+    integrationsbezogene Zusatzinformationen.
+</p>
+
+<h3>SAP Stammdaten</h3>
+<p>
+    Falls eine SAP-Verknüpfung existiert, werden die zugehörigen Personalstammdaten aus SAP angezeigt. Dazu gehören
+    unter anderem:
+</p>
+
+<ul>
+    <li>Personalnummer</li>
+    <li>Name und Adresse</li>
+    <li>Organisationseinheiten</li>
+    <li>Kontaktdaten</li>
+    <li>Ein- und Austrittsinformationen</li>
+    <li>Batch- und Kaderinformationen</li>
+</ul>
+
+<p>
+    Falls keine Daten vorhanden sind, erscheint ein entsprechender Hinweis.
+</p>
+
+<h2>Zustandsanzeige</h2>
+
+<p>
+    Existiert der Benutzer nicht mehr im AD (z. B. gelöscht), wird dies über eine Warnmeldung angezeigt.
+    Die Stammdaten im System bleiben weiterhin erhalten und können zur Analyse genutzt werden.
+</p>
+
+<h2>Zweck</h2>
+
+<p>
+    Die Detailansicht dient zur Einsicht technischer AD-Daten und organisatorischer Stammdaten sowie zur
+    Vorbereitung administrativer Tätigkeiten wie Passwortreset, Kontenprüfung und Matching gegen SAP.
+</p>

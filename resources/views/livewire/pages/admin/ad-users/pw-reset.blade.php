@@ -18,7 +18,7 @@
 
     @if($adUser->extensionattribute14)
         @php
-            $geburt = \Carbon\Carbon::createFromFormat('Ymd', $adUser->extensionattribute14);
+            $geburt = \Carbon\Carbon::createFromFormat('Ymd', $adUser->extensionattribute2);
         @endphp
         <div>Geburtsdatum: {{ $geburt->format('d.m.Y') }} ({{ $geburt->age }})</div>
     @endif

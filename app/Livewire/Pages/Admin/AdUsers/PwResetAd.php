@@ -38,7 +38,8 @@ class PwResetAd extends Component
         $svc = new AdUserService();
         $ldap = $svc->findByGuid($this->adUser->guid);
 
-        if (!$ldap) {
+        if (!$ldap) 
+		{
             return;
         }
 
@@ -47,9 +48,7 @@ class PwResetAd extends Component
         $this->adIsLocked = ($ldap->lockouttime > 0);
         $this->adIsDisabled = (($uac & 2) === 2);
 
-        $pwdLastSet = $ldap->pwdlastset instanceof \Carbon\Carbon
-            ? $ldap->pwdlastset->getTimestamp()
-            : (int) ($ldap->pwdlastset ?? 0);
+        $pwdLastSet = $ldap->pwdlastset instanceof \Carbon\Carbon ? $ldap->pwdlastset->getTimestamp() : (int) ($ldap->pwdlastset ?? 0);
 
         $this->adRequiresPwdChange = ($pwdLastSet === 0);
 
@@ -60,7 +59,7 @@ class PwResetAd extends Component
 
     public function generateAdPassword(): void
     {
-        $this->adPassword = UserHelper::generatePassword(12);
+        $this->adPassword = UserHelper::generatePassword();
     }
 
     public function saveAd(): void
@@ -71,39 +70,51 @@ class PwResetAd extends Component
         $ldap = $svc->findByGuid($this->adUser->guid);
 
         if (!$ldap) {
-            $this->adError = "Benutzer im AD nicht gefunden.";
+            $this->adError = "Benutzer nicht im AD gefunden.";
             return;
         }
 
         $changed = false;
 
-        if ($this->adUnlock && $this->adIsLocked) {
+        if ($this->adUnlock && $this->adIsLocked) 
+		{
             $r = $svc->unlock($ldap);
             if ($r !== true) { $this->adError = $r; return; }
             $changed = true;
         }
 
-        if ($this->adToggleActive) {
-            if ($this->adIsDisabled) {
+        if ($this->adToggleActive) 
+		{
+            if ($this->adIsDisabled) 
+			{
                 $r = $svc->enable($ldap);
-            } else {
+            } 
+			else 
+			{
                 $r = $svc->disable($ldap);
             }
+			
             if ($r !== true) { $this->adError = $r; return; }
             $changed = true;
         }
 
-        if ($this->adTogglePwdChange) {
-            if ($this->adRequiresPwdChange) {
+        if ($this->adTogglePwdChange) 
+		{
+            if ($this->adRequiresPwdChange) 
+			{
                 $r = $svc->clearForceChange($ldap);
-            } else {
+            } 
+			else 
+			{
                 $r = $svc->forceChangeOnNextLogin($ldap);
             }
-            if ($r !== true) { $this->adError = $r; return; }
+            
+			if ($r !== true) { $this->adError = $r; return; }
             $changed = true;
         }
 
-        if (trim($this->adPassword) !== '') {
+        if (trim($this->adPassword) !== '') 
+		{
 
             $this->validate([
                 'adPassword' => 'min:8'
@@ -121,11 +132,14 @@ class PwResetAd extends Component
             $changed = true;
         }
 
-        if ($changed) {
-            $this->adSuccess = "Einstellungen erfolgreich aktualisiert.";
+        if ($changed) 
+		{
+            $this->adSuccess = "Änderungen erfolgreich gespeichert.";
             $this->loadAdStatus();
-        } else {
-            $this->adSuccess = "Keine Aenderungen vorgenommen.";
+        } 
+		else 
+		{
+            $this->adSuccess = "Keine Änderungen vorgenommen.";
         }
     }
 
