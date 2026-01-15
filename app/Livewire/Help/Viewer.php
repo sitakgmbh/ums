@@ -9,6 +9,7 @@ class Viewer extends Component
 {
     public string $key;
     public array $toc = [];
+    public array $pageRoles = [];
     public string $html = '';
     public bool $notFound = false;
 
@@ -24,7 +25,7 @@ class Viewer extends Component
     }
 
     /* ============================================================
-       TOC laden & validieren
+       TOC laden + Rollenmapping aufbauen
        ============================================================ */
     protected function loadToc(): void
     {
@@ -37,6 +38,7 @@ class Viewer extends Component
 
         $raw = json_decode(file_get_contents($path), true) ?? [];
         $toc = [];
+        $this->pageRoles = [];
 
         foreach ($raw as $title => $group) {
             $clean = [
@@ -45,12 +47,19 @@ class Viewer extends Component
             ];
 
             foreach ($group['items'] ?? [] as $item) {
-                $clean['items'][] = [
+                $entry = [
                     'title'  => $item['title'] ?? null,
                     'roles'  => $item['roles'] ?? null,
                     'routes' => $item['routes'] ?? [],
                     'page'   => $item['page'] ?? null,
                 ];
+
+                // Rollenmapping für Suche + Zugriff
+                if ($entry['page']) {
+                    $this->pageRoles[$entry['page']] = $entry['roles'] ?? null;
+                }
+
+                $clean['items'][] = $entry;
             }
 
             $toc[$title] = $clean;
@@ -60,14 +69,13 @@ class Viewer extends Component
     }
 
     /* ============================================================
-       Mapping: Route → page
+       Mapping Route → page
        ============================================================ */
     protected function resolveKey(): void
     {
         foreach ($this->toc as $group) {
             foreach ($group['items'] as $entry) {
 
-                // mehrere Routen?
                 foreach ($entry['routes'] ?? [] as $r) {
                     if ($r === $this->key) {
                         $this->key = $entry['page'] ?? $entry['routes'][0];
@@ -75,7 +83,6 @@ class Viewer extends Component
                     }
                 }
 
-                // direkter Page-Fall?
                 if (($entry['page'] ?? null) === $this->key) {
                     return;
                 }
@@ -84,35 +91,54 @@ class Viewer extends Component
     }
 
     /* ============================================================
-       Inhalt laden
+       Inhalt laden + Rollen pruefen
        ============================================================ */
-    protected function loadContent(string $key): void
-    {
-        $file = resource_path("help/{$key}.html");
+protected function loadContent(string $key): void
+{
+    $roles = $this->pageRoles[$key] ?? null;
 
-        if (!file_exists($file)) {
-            $this->notFound = true;
-            $this->html = '<p class="text-muted">Für diese Seite ist keine Hilfe verfügbar.</p>';
-            return;
-        }
-
-        $html = file_get_contents($file);
-
-        $user = auth()->user();
-        $isAdmin = $user && (
-            (method_exists($user, 'isAdmin') && $user->isAdmin()) ||
-            (method_exists($user, 'hasRole') && $user->hasRole('admin'))
-        );
-
-        // <admin-only> block filtern
-        if ($isAdmin) {
-            $html = preg_replace('/<admin-only>(.*?)<\/admin-only>/s', '$1', $html);
-        } else {
-            $html = preg_replace('/<admin-only>.*?<\/admin-only>/s', '', $html);
-        }
-
-        $this->html = $html;
+    if (!$this->hasRoleAccess($roles)) {
+        $this->notFound = true;
+        $this->html = '<p class="text-muted">Kein Zugriff.</p>';
+        return;
     }
+
+    $file = resource_path("help/{$key}.html");
+
+    if (!file_exists($file)) {
+        $this->notFound = true;
+        $this->html = '<p class="text-muted">Fuer diese Seite ist keine Hilfe verfuegbar.</p>';
+        return;
+    }
+
+    $html = file_get_contents($file);
+
+    $user = auth()->user();
+    $isAdmin = $user && (
+        (method_exists($user, 'isAdmin') && $user->isAdmin()) ||
+        (method_exists($user, 'hasRole') && $user->hasRole('admin'))
+    );
+
+    //
+    // admin-only: Admin bekommt Inhalt, Non-Admin nix
+    //
+    if ($isAdmin) {
+        $html = preg_replace('/<admin-only>(.*?)<\/admin-only>/s', '$1', $html);
+    } else {
+        $html = preg_replace('/<admin-only>.*?<\/admin-only>/s', '', $html);
+    }
+
+    //
+    // admin-note: Admin bekommt Tag + Inhalt, Non-Admin nix
+    //
+    if (!$isAdmin) {
+        $html = preg_replace('/<admin-note>.*?<\/admin-note>/s', '', $html);
+    }
+
+    $this->html = $html;
+}
+
+
 
     /* ============================================================
        Rollenprüfung
@@ -136,7 +162,7 @@ class Viewer extends Component
     }
 
     /* ============================================================
-       Suche
+       Suche (mit Rollenfilter)
        ============================================================ */
     public function updatedQuery(): void
     {
@@ -148,55 +174,75 @@ class Viewer extends Component
         $this->performSearch();
     }
 
-    public function performSearch(): bool
-    {
-        $this->results = [];
-        $term = trim($this->query);
+public function performSearch(): bool
+{
+    $this->results = [];
+    $term = trim($this->query);
 
-        if (strlen($term) < 2) {
-            return false;
+    if (strlen($term) < 2) {
+        return false;
+    }
+
+    $files = collect(File::files(resource_path('help')))
+        ->filter(fn($f) => $f->getExtension() === 'html')
+        ->filter(function ($f) {
+            $name = $f->getFilenameWithoutExtension();
+            return array_key_exists($name, $this->pageRoles);
+        });
+
+    $user = auth()->user();
+    $isAdmin = $user && (
+        (method_exists($user, 'isAdmin') && $user->isAdmin()) ||
+        (method_exists($user, 'hasRole') && $user->hasRole('admin'))
+    );
+
+    foreach ($files as $file) {
+        $name = $file->getFilenameWithoutExtension();
+        $roles = $this->pageRoles[$name] ?? null;
+
+        // Page Rollen pruefen
+        if (!$this->hasRoleAccess($roles)) {
+            continue;
         }
 
-        $files = File::files(resource_path('help'));
+        $content = file_get_contents($file->getRealPath());
 
-        $user = auth()->user();
-        $isAdmin = $user && (
-            (method_exists($user, 'isAdmin') && $user->isAdmin()) ||
-            (method_exists($user, 'hasRole') && $user->hasRole('admin'))
+        // Admin-Blöcke fuer Nichtadmins entfernen
+        if (!$isAdmin) {
+            $patterns = [
+                '/<admin-only>.*?<\/admin-only>/s',
+                '/<admin-note>.*?<\/admin-note>/s',
+            ];
+
+            foreach ($patterns as $pattern) {
+                $content = preg_replace($pattern, '', $content);
+            }
+        }
+
+        $plain = strip_tags($content);
+        $pos = stripos($plain, $term);
+
+        if ($pos === false) {
+            continue;
+        }
+
+        $start = max(0, $pos - 80);
+        $excerpt = substr($plain, $start, strlen($term) + 160);
+
+        $excerpt = preg_replace(
+            '/' . preg_quote($term, '/') . '/i',
+            '<mark>$0</mark>',
+            $excerpt
         );
 
-        foreach ($files as $file) {
-            if ($file->getExtension() !== 'html') continue;
-
-            $name = $file->getFilenameWithoutExtension();
-            $content = file_get_contents($file->getRealPath());
-
-            if (!$isAdmin) {
-                $content = preg_replace('/<admin-only>.*?<\/admin-only>/s', '', $content);
-            }
-
-            $plain = strip_tags($content);
-            $pos = stripos($plain, $term);
-
-            if ($pos === false) continue;
-
-            $start = max(0, $pos - 80);
-            $excerpt = substr($plain, $start, strlen($term) + 160);
-
-            $excerpt = preg_replace(
-                '/' . preg_quote($term, '/') . '/i',
-                '<mark>$0</mark>',
-                $excerpt
-            );
-
-            $this->results[] = [
-                'key'     => $name,
-                'excerpt' => trim($excerpt),
-            ];
-        }
-
-        return count($this->results) > 0;
+        $this->results[] = [
+            'key'     => $name,
+            'excerpt' => trim($excerpt),
+        ];
     }
+
+    return count($this->results) > 0;
+}
 
     /* ============================================================
        Navigation

@@ -3,6 +3,7 @@
     "items": [
       {
         "routes": ["dashboard"],
+		"page": "dashboard",
         "title": "Dashboard"
       }
     ]

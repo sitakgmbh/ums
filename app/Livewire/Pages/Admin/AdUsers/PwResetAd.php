@@ -36,6 +36,13 @@ class PwResetAd extends Component
     private function loadAdStatus(): void
     {
         $svc = new AdUserService();
+
+		if (!$svc->isReachable()) 
+		{
+			$this->adError = "Active Directory momentan nicht erreichbar.";
+			return;
+		}
+
         $ldap = $svc->findByGuid($this->adUser->guid);
 
         if (!$ldap) 

@@ -9,6 +9,17 @@ use LdapRecord\Exceptions\InsufficientAccessException;
 
 class AdUserService
 {
+	public function isReachable(): bool
+	{
+		try {
+			// einfacher Bind-Test
+			LdapUser::query()->first();
+			return true;
+		} catch (\Throwable $e) {
+			return false;
+		}
+	}
+
     public function findByGuid(string $guid): ?LdapUser
     {
         return LdapUser::findByGuid($guid);

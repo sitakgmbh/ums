@@ -49,6 +49,11 @@ return [
                     'icon' => 'mdi mdi-account-multiple',
                 ],
                 [
+                    'label' => 'SAP Export',
+                    'url' => '/admin/sap-export',
+                    'icon' => 'mdi mdi-file-account',
+                ],
+                [
                     'label' => 'Systemsteuerung',
                     'url' => '/admin',
                     'icon' => 'mdi mdi-apps',

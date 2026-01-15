@@ -185,7 +185,6 @@ class MyPdgrAdSyncService
             if ($rowCount < $this->minExpectedRows) 
 			{
                 $msg = "Die Tabelle '{$table}' enthält nur {$rowCount} Einträge (erwartet: mindestens {$this->minExpectedRows}).";
-                Logger::db("MyPdgr", "error", $msg, ["actor" => $this->actor]);
                 throw new \RuntimeException($msg);
             }
 
