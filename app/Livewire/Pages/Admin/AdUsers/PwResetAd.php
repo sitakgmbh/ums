@@ -35,30 +35,21 @@ class PwResetAd extends Component
         $this->loadAdStatus();
     }
 
-	private function loadAdStatus(): void
-	{
-		$svc = new AdUserService();
-		$ldap = $svc->findByGuid($this->adUser->guid);
+    private function loadAdStatus(): void
+    {
+        $svc = new AdUserService();
+        $ldap = $svc->findByGuid($this->adUser->guid);
 
-		if (!$ldap) {
-			return;
-		}
+        if (!$ldap) {
+            return;
+        }
 
-		$this->adIsLocked = ($ldap->lockouttime > 0);
+		$lock = $ldap->lockouttime ?? null;
 
-		$pwd = $ldap->pwdlastset ?? null;
+        $pwdLastSet = $ldap->pwdlastset instanceof \Carbon\Carbon ? $ldap->pwdlastset->getTimestamp() : (int)($ldap->pwdlastset ?? 0);
 
-		if ($pwd instanceof \Carbon\Carbon) {
-			$pwdLastSet = $pwd->timestamp;
-		} elseif (is_numeric($pwd)) {
-			$pwdLastSet = (int)$pwd;
-		} else {
-			// Unbekanntes Format oder leer → behandeln wie "muss ändern"
-			$pwdLastSet = 0;
-		}
-
-		$this->adRequiresPwdChange = ($pwdLastSet === 0);
-	}
+        $this->adRequiresPwdChange = ($pwdLastSet === 0);
+    }
 
     public function generateAdPassword(): void
     {
