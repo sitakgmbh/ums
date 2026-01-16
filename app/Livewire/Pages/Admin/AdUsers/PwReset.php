@@ -10,6 +10,7 @@ use Livewire\Attributes\Layout;
 class PwReset extends Component
 {
     public AdUser $adUser;
+    public bool $verified = false;
 
     public function mount(AdUser $adUser): void
     {
@@ -18,11 +19,9 @@ class PwReset extends Component
 
     public function render()
     {
-        $ad = $this->adUser;
-
-        return view('livewire.pages.admin.ad-users.pw-reset', compact('ad'))
+        return view('livewire.pages.admin.ad-users.pw-reset')
             ->layoutData([
-                'pageTitle' => 'Passwort-Änderung ' . ($ad->display_name ?? $ad->username)
+                'pageTitle' => 'Änderung Passwort ' . ($this->adUser->display_name ?? $this->adUser->username)
             ]);
     }
 }

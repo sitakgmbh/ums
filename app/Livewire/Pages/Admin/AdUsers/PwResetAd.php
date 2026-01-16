@@ -58,7 +58,7 @@ class PwResetAd extends Component
 
     private function logAdFailure(string $error): void
     {
-        Logger::db("ad", "error", "AD Aktion '{$this->adUsername}' fehlgeschlagen", [
+        Logger::db("ad", "error", "Änderung AD-Passwort '{$this->adUsername}' fehlgeschlagen", [
             "unlock"     => $this->adUnlock ?: null,
             "pw_change"  => $this->adChangePassword ?: null,
             "force_pw"   => $this->adForcePwdChange ?: null,
@@ -71,7 +71,7 @@ class PwResetAd extends Component
 
     private function logAdSuccess(): void
     {
-        Logger::db("ad", "info", "AD Aktion '{$this->adUsername}' erfolgreich", [
+        Logger::db("ad", "info", "Änderung AD-Passwort '{$this->adUsername}' erfolgreich", [
             "unlock"     => $this->adUnlock ?: null,
             "pw_change"  => $this->adChangePassword ?: null,
             "force_pw"   => $this->adForcePwdChange ?: null,
@@ -146,10 +146,10 @@ class PwResetAd extends Component
 
         if ($changed) {
             $this->logAdSuccess();
-            $this->adSuccess = "Aenderungen gespeichert.";
+            $this->adSuccess = "Änderungen erfolgreich gespeichert.";
             $this->loadAdStatus();
         } else {
-            $this->adSuccess = "Keine Aenderungen vorgenommen.";
+            $this->adSuccess = "Keine Änderungen vorgenommen.";
         }
     }
 

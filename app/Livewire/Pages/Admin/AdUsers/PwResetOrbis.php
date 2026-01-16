@@ -37,7 +37,7 @@ class PwResetOrbis extends Component
 
     private function logOrbisFailure(string $error): void
     {
-        Logger::db("orbis", "error", "ORBIS Aenderung '{$this->orbisUsername}' fehlgeschlagen", [
+        Logger::db("orbis", "error", "Änderung Orbis-Passwort '{$this->orbisUsername}' fehlgeschlagen", [
             "user_id"   => $this->orbisUser['id'] ?? null,
             "unlock"    => $this->orbisUnlock ?: null,
             "pw_change" => $this->orbisChangePassword ?: null,
@@ -51,7 +51,7 @@ class PwResetOrbis extends Component
 
     private function logOrbisSuccess(): void
     {
-        Logger::db("orbis", "info", "ORBIS Aenderung '{$this->orbisUsername}' erfolgreich", [
+        Logger::db("orbis", "info", "Änderung Orbis-Passwort '{$this->orbisUsername}' erfolgreich", [
             "user_id"   => $this->orbisUser['id'] ?? null,
             "unlock"    => $this->orbisUnlock ?: null,
             "pw_change" => $this->orbisChangePassword ?: null,
@@ -156,8 +156,8 @@ class PwResetOrbis extends Component
             }
 
             if (!$helper->resetUserPw($this->orbisUser['id'], $pw, $this->orbisForcePwdChange)) {
-                $this->logOrbisFailure("Passwort-Reset fehlgeschlagen");
-                $this->orbisError = "Passwortänderung fehlgeschlagen.";
+                $this->logOrbisFailure("Änderung Passwort fehlgeschlagen");
+                $this->orbisError = "Änderung Passwort fehlgeschlagen.";
                 return;
             }
 
