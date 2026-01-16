@@ -45,7 +45,7 @@
 						Account entsperren
 
 						<span class="text-muted small">
-							(aktuell {{ $orbisIsLocked ? 'gesperrt' : 'entsperrt' }})
+							({{ $orbisIsLocked ? 'gesperrt' : 'nicht gesperrt' }})
 						</span>
 					</label>
 				</div>
@@ -79,7 +79,7 @@
                         </div>
                     </div>
 
-                    <div class="form-check mb-3">
+                    <div class="form-check mb-2">
                         <input id="orbisForcePwdChange"
                                type="checkbox"
                                class="form-check-input"
