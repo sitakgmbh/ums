@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Log;
 use LdapRecord\Models\ActiveDirectory\User as LdapUser;
 use App\Utils\Logging\Logger;
 use App\Models\AdUser;
+use App\Enums\AdUserEmployeeType;
 
 class UserSyncService
 {
@@ -88,7 +89,8 @@ class UserSyncService
             $seenSids[] = $sid;
 
             $data = [
-                "sid"                   => $sid,
+				"employee_type"  => $this->deriveEmployeeType($ldapUser->initials[0] ?? null),
+				"sid"                   => $sid,
                 "guid"                  => $guid,
                 "username"              => $username,
                 "firstname"             => $ldapUser->givenname[0] ?? null,
@@ -234,4 +236,21 @@ class UserSyncService
 		// thumbnailPhoto ist binär/string
 		return base64_encode($photo);
 	}
+
+	private function deriveEmployeeType(?string $initials): AdUserEmployeeType
+	{
+		$initials = trim((string) $initials);
+
+		return match (true) 
+		{
+			$initials === '00000'                => AdUserEmployeeType::External,
+			$initials === '11111'                => AdUserEmployeeType::Test,
+			$initials === '99999'                => AdUserEmployeeType::InternalPending,
+			preg_match('/^[67][0-9]{4}$/', $initials) === 1
+												=> AdUserEmployeeType::Internal,
+			default                              => AdUserEmployeeType::Unknown,
+		};
+	}
+
+
 }
