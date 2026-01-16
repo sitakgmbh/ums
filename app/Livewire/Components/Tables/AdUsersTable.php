@@ -11,16 +11,27 @@ class AdUsersTable extends BaseTable
 {
     public bool $showInactive = true;
     public bool $showDeleted = false;
-    public array $filterEmployeeTypes = [];
+
+    // Employee-Type-Filterflags (alle standardmässig aktiv)
+    public bool $showEmplTypeInternal = true;
+    public bool $showEmplTypeExternal = true;
+    public bool $showEmplTypeTest = true;
+    public bool $showEmplTypeUnknown = true;
 
     protected $queryString = [
-        "showInactive"       => ["except" => true],
-        "showDeleted"        => ["except" => false],
-        "search"             => ["except" => ""],
-        "perPage"            => ["except" => 10],
-        "sortField"          => ["except" => null],
-        "sortDirection"      => ["except" => null],
-        "filterEmployeeTypes"=> ["except" => []],
+        "showInactive"              => ["except" => true],
+        "showDeleted"               => ["except" => false],
+
+        "showEmplTypeInternal"      => ["except" => true],
+        "showEmplTypeInternalPending"=> ["except" => true],
+        "showEmplTypeExternal"      => ["except" => true],
+        "showEmplTypeTest"          => ["except" => true],
+        "showEmplTypeUnknown"       => ["except" => true],
+
+        "search"                    => ["except" => ""],
+        "perPage"                   => ["except" => 10],
+        "sortField"                 => ["except" => null],
+        "sortDirection"             => ["except" => null],
     ];
 
     private const TYPE_ICONS = [
@@ -43,13 +54,16 @@ class AdUsersTable extends BaseTable
         $this->resetPage();
     }
 
-    public function toggleEmployeeFilter(string $type): void
+    // neue Toggles
+    public function toggleEmplType(string $type): void
     {
-        if (in_array($type, $this->filterEmployeeTypes, true)) {
-            $this->filterEmployeeTypes = array_values(array_diff($this->filterEmployeeTypes, [$type]));
-        } else {
-            $this->filterEmployeeTypes[] = $type;
-        }
+        match ($type) {
+            'internal'         => $this->showEmplTypeInternal         = !$this->showEmplTypeInternal,
+            'external'         => $this->showEmplTypeExternal          = !$this->showEmplTypeExternal,
+            'test'             => $this->showEmplTypeTest              = !$this->showEmplTypeTest,
+            'unknown'          => $this->showEmplTypeUnknown           = !$this->showEmplTypeUnknown,
+            default => null
+        };
 
         $this->resetPage();
     }
@@ -62,21 +76,20 @@ class AdUsersTable extends BaseTable
     protected function getColumns(): array
     {
         return [
-            "display_name"  => ["label" => "Anzeigename",  "sortable" => true, "searchable" => true],
-            "firstname"     => ["label" => "Vorname",       "sortable" => true, "searchable" => true],
-            "lastname"      => ["label" => "Nachname",      "sortable" => true, "searchable" => true],
-            "username"      => ["label" => "Benutzername",  "sortable" => true, "searchable" => true],
-			"title"      => ["label" => "Funktion",  "sortable" => true, "searchable" => true],
-            "employee_type" => ["label" => "Typ",           "sortable" => true, "searchable" => false],
-            "is_enabled"    => ["label" => "Account",       "sortable" => true],
-            "is_existing"   => ["label" => "AD Status",     "sortable" => true],
-            "actions"       => ["label" => "Aktionen",      "sortable" => false, "class" => "shrink"],
+            "display_name"  => ["label" => "Anzeigename", "sortable" => true, "searchable" => true],
+            "firstname"     => ["label" => "Vorname",      "sortable" => true, "searchable" => true],
+            "lastname"      => ["label" => "Nachname",     "sortable" => true, "searchable" => true],
+            "username"      => ["label" => "Benutzername", "sortable" => true, "searchable" => true],
+            "title"         => ["label" => "Funktion",     "sortable" => true, "searchable" => true],
+            "employee_type" => ["label" => "Typ",          "sortable" => true],
+            "is_enabled"    => ["label" => "Account",      "sortable" => true],
+            "is_existing"   => ["label" => "AD Status",    "sortable" => true],
+            "actions"       => ["label" => "Aktionen",     "sortable" => false, "class" => "shrink"],
         ];
     }
 
     protected function getCustomSorts(): array
     {
-        // Reihenfolge basiert auf Enum-Business-Logik
         return [
             'employee_type' => function (Builder $query, string $direction) {
                 $query->orderByRaw("
@@ -120,34 +133,37 @@ class AdUsersTable extends BaseTable
                   ->orWhereRaw("LOWER(firstname) LIKE ?", [$needle])
                   ->orWhereRaw("LOWER(lastname) LIKE ?", [$needle])
                   ->orWhereRaw("LOWER(username) LIKE ?", [$needle])
-				  ->orWhereRaw("LOWER(title) LIKE ?", [$needle]);
+                  ->orWhereRaw("LOWER(title) LIKE ?", [$needle]);
             });
         }
 
-        if (!empty($this->filterEmployeeTypes)) {
-            $expanded = collect($this->filterEmployeeTypes)
-                ->flatMap(fn($t) => $t === 'internal' ? ['internal', 'internal-pending'] : [$t])
-                ->unique()
-                ->values()
-                ->all();
+		$allowed = [];
 
-            $query->whereIn('employee_type', $expanded);
-        }
+		if ($this->showEmplTypeExternal) $allowed[] = 'external';
+		if ($this->showEmplTypeTest)     $allowed[] = 'test';
+		if ($this->showEmplTypeInternal) {
+			$allowed[] = 'internal';
+			$allowed[] = 'internal-pending'; // wird mitgefiltert
+		}
+		if ($this->showEmplTypeUnknown)  $allowed[] = 'unknown';
+
+		if (!empty($allowed)) {
+			$query->whereIn('employee_type', $allowed);
+		}
+
     }
 
     protected function getColumnBadges(): array
     {
         return [
             "is_enabled" => [
-                true  => ["label" => "Aktiviert",   "class" => "success",  "icon" => "mdi mdi-check"],
-                false => ["label" => "Deaktiviert", "class" => "secondary","icon" => "mdi mdi-block-helper"],
+                true  => ["label" => "Aktiviert", "class" => "success", "icon" => "mdi mdi-check"],
+                false => ["label" => "Deaktiviert", "class" => "secondary", "icon" => "mdi mdi-block-helper"],
             ],
-
             "is_existing" => [
-                true  => ["label" => "Vorhanden",   "class" => "success",  "icon" => "mdi mdi-check"],
-                false => ["label" => "Gelöscht",    "class" => "secondary","icon" => "mdi mdi-trash-can"],
+                true  => ["label" => "Vorhanden", "class" => "success", "icon" => "mdi mdi-check"],
+                false => ["label" => "Gelöscht", "class" => "secondary", "icon" => "mdi mdi-trash-can"],
             ],
-
             "employee_type" => collect(AdUserEmployeeType::cases())
                 ->mapWithKeys(fn(AdUserEmployeeType $c) => [
                     $c->value => [
@@ -176,54 +192,67 @@ class AdUsersTable extends BaseTable
     protected function getTableActions(): array
     {
         return [
+
+            // INTERNAL
             [
-                "method" => "toggleEmployeeFilter('internal')",
+                "method" => "toggleEmplType('internal')",
                 "icon"   => self::TYPE_ICONS['internal'],
-                "class"  => in_array('internal', $this->filterEmployeeTypes, true) ? "btn-light" : "btn-outline-light",
-                "title"  => in_array('internal', $this->filterEmployeeTypes, true)
+                "class"  => $this->showEmplTypeInternal ? "btn-light" : "btn-outline-light",
+                "title"  => $this->showEmplTypeInternal
                     ? "PDGR Mitarbeiter ausblenden"
                     : "PDGR Mitarbeiter anzeigen",
             ],
+
+            // EXTERNAL
             [
-                "method" => "toggleEmployeeFilter('external')",
+                "method" => "toggleEmplType('external')",
                 "icon"   => self::TYPE_ICONS['external'],
-                "class"  => in_array('external', $this->filterEmployeeTypes, true) ? "btn-light" : "btn-outline-light",
-                "title"  => in_array('external', $this->filterEmployeeTypes, true)
-                    ? "Externe Mitarbeiter ausblenden"
-                    : "Externe Mitarbeiter anzeigen",
+                "class"  => $this->showEmplTypeExternal ? "btn-light" : "btn-outline-light",
+                "title"  => $this->showEmplTypeExternal
+                    ? "Externe ausblenden"
+                    : "Externe anzeigen",
             ],
+
+            // TEST
             [
-                "method" => "toggleEmployeeFilter('test')",
+                "method" => "toggleEmplType('test')",
                 "icon"   => self::TYPE_ICONS['test'],
-                "class"  => in_array('test', $this->filterEmployeeTypes, true) ? "btn-light" : "btn-outline-light",
-                "title"  => in_array('test', $this->filterEmployeeTypes, true)
+                "class"  => $this->showEmplTypeTest ? "btn-light" : "btn-outline-light",
+                "title"  => $this->showEmplTypeTest
                     ? "Test-Benutzer ausblenden"
                     : "Test-Benutzer anzeigen",
             ],
+
+            // UNKNOWN
             [
-                "method" => "toggleEmployeeFilter('unknown')",
+                "method" => "toggleEmplType('unknown')",
                 "icon"   => self::TYPE_ICONS['unknown'],
-                "class"  => in_array('unknown', $this->filterEmployeeTypes, true) ? "btn-light" : "btn-outline-light",
-                "title"  => in_array('unknown', $this->filterEmployeeTypes, true)
+                "class"  => $this->showEmplTypeUnknown ? "btn-light" : "btn-outline-light",
+                "title"  => $this->showEmplTypeUnknown
                     ? "Unbekannte ausblenden"
                     : "Unbekannte anzeigen",
             ],
+
+            // disabled
             [
                 "method" => "toggleInactive",
                 "icon"   => "mdi mdi-block-helper",
                 "class"  => $this->showInactive ? "btn-light" : "btn-outline-light",
                 "title"  => $this->showInactive
-                    ? "Deaktivierte Benutzer ausblenden"
-                    : "Deaktivierte Benutzer anzeigen",
+                    ? "Deaktivierte ausblenden"
+                    : "Deaktivierte anzeigen",
             ],
+
+            // deleted
             [
                 "method" => "toggleDeleted",
                 "icon"   => "mdi mdi-trash-can",
                 "class"  => $this->showDeleted ? "btn-light" : "btn-outline-light",
                 "title"  => $this->showDeleted
-                    ? "Gelöschte Benutzer ausblenden"
-                    : "Gelöschte Benutzer anzeigen",
+                    ? "Geloeschte ausblenden"
+                    : "Geloeschte anzeigen",
             ],
+
             [
                 "method" => "exportCsv",
                 "icon"   => "mdi mdi-tray-arrow-down",
@@ -235,6 +264,6 @@ class AdUsersTable extends BaseTable
 
     protected function query(): Builder
     {
-        return AdUser::query()->select('ad_users.*');
+        return AdUser::query()->select("ad_users.*");
     }
 }
