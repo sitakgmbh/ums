@@ -3,6 +3,7 @@ namespace App\Livewire\Components\Tables;
 
 use App\Livewire\Components\Tables\BaseTable;
 use App\Models\AdUser;
+use App\Enums\AdUserEmployeeType;
 use Illuminate\Database\Eloquent\Builder;
 
 class AdUsersTable extends BaseTable
@@ -43,11 +44,29 @@ class AdUsersTable extends BaseTable
             "firstname"      => ["label" => "Vorname", "sortable" => true, "searchable" => true],
             "lastname"       => ["label" => "Nachname", "sortable" => true, "searchable" => true],
             "username"       => ["label" => "Benutzername", "sortable" => true, "searchable" => true],
-            "is_enabled"     => ["label" => "Account-Status", "sortable" => true, "searchable" => false],
+            "employee_type_value"     => ["label" => "Typ", "sortable" => true, "searchable" => true],
+			"is_enabled"     => ["label" => "Account-Status", "sortable" => true, "searchable" => false],
             "is_existing"    => ["label" => "AD-Status", "sortable" => true, "searchable" => false],
             "actions"        => ["label" => "Aktionen", "sortable" => false, "searchable" => false, "class" => "shrink"],
         ];
     }
+
+	protected function getCustomSorts(): array
+	{
+		return [
+			'employee_type_value' => function ($query, $direction) {
+				$query->orderByRaw("
+					CASE
+						WHEN TRIM(initials) = '00000' THEN 1
+						WHEN TRIM(initials) = '11111' THEN 2
+						WHEN TRIM(initials) = '99999' THEN 3
+						WHEN TRIM(initials) REGEXP '^[67][0-9]{4}$' THEN 4
+						ELSE 5
+					END $direction
+				");
+			},
+		];
+	}
 
     protected function defaultSortField(): string
     {
@@ -79,7 +98,18 @@ class AdUsersTable extends BaseTable
 				$q->orWhereRaw("LOWER(display_name) LIKE ?", ["%{$search}%"])
 				  ->orWhereRaw("LOWER(firstname) LIKE ?", ["%{$search}%"])
 				  ->orWhereRaw("LOWER(lastname) LIKE ?", ["%{$search}%"])
-				  ->orWhereRaw("LOWER(username) LIKE ?", ["%{$search}%"]);
+				  ->orWhereRaw("LOWER(username) LIKE ?", ["%{$search}%"])
+				->orWhere(function ($sub) use ($search) {
+					$sub->whereRaw("
+						CASE
+							WHEN TRIM(initials) = '00000' THEN 'extern'
+							WHEN TRIM(initials) = '11111' THEN 'test'
+							WHEN TRIM(initials) = '99999' THEN 'internal-pending'
+							WHEN TRIM(initials) REGEXP '^[67][0-9]{4}$' THEN 'intern'
+							ELSE 'unbekannt'
+						END LIKE ?
+					", ["%{$search}%"]);
+				});
 			});
 		}
 	}
@@ -95,6 +125,13 @@ class AdUsersTable extends BaseTable
                 true  => ["label" => "Vorhanden", "class" => "success"],
                 false => ["label" => "Gelöscht", "class" => "secondary"],
             ],
+			'employee_type_value' => [
+				'external'         => ['label' => AdUserEmployeeType::External->label(),        'class' => 'secondary'],
+				'test'             => ['label' => AdUserEmployeeType::Test->label(),            'class' => 'info'],
+				'internal'         => ['label' => AdUserEmployeeType::Internal->label(),        'class' => 'success'],
+				'internal-pending' => ['label' => AdUserEmployeeType::InternalPending->label(), 'class' => 'success'],
+				'unknown'          => ['label' => AdUserEmployeeType::Unknown->label(),         'class' => 'danger'],
+			],
         ];
     }
 
@@ -137,4 +174,19 @@ class AdUsersTable extends BaseTable
             ],
         ];
     }
+
+	protected function query(): Builder
+	{
+		return AdUser::query()
+			->select('ad_users.*')
+			->selectRaw("
+				CASE
+					WHEN TRIM(initials) = '00000' THEN 'external'
+					WHEN TRIM(initials) = '11111' THEN 'test'
+					WHEN TRIM(initials) = '99999' THEN 'internal-pending'
+					WHEN TRIM(initials) REGEXP '^[67][0-9]{4}$' THEN 'internal'
+					ELSE 'unknown'
+				END AS employee_type_value
+			");
+	}
 }

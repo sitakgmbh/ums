@@ -28,28 +28,49 @@ class PwResetAd extends Component
     public ?string $adError = null;
     public ?string $adSuccess = null;
 
-    public function mount(AdUser $adUser): void
-    {
-        $this->adUser = $adUser;
-        $this->adUsername = strtoupper($adUser->username);
-        $this->loadAdStatus();
-    }
+	public function mount(AdUser $adUser): void
+	{
+		$this->adUser = $adUser;
+		$this->adUsername = strtoupper($adUser->username);
 
-    private function loadAdStatus(): void
-    {
-        $svc = new AdUserService();
-        $ldap = $svc->findByGuid($this->adUser->guid);
+		try {
+			$this->loadAdStatus();
+		} catch (\Throwable $e) {
 
-        if (!$ldap) {
-            return;
-        }
+			\Log::warning("AD nicht erreichbar beim Laden von PwResetAd", [
+				'user_id' => $adUser->id,
+				'exception' => $e,
+			]);
+
+			$this->adError = "Das Active Directory ist momentan nicht erreichbar.";
+
+			// Verhindert, dass die Komponente weiter crashed
+			return;
+		}
+	}
+
+	private function loadAdStatus(): void
+	{
+		$svc = new AdUserService();
+
+		try {
+			$ldap = $svc->findByGuid($this->adUser->guid);
+		} catch (\Throwable $e) {
+			$this->adError = "Verbindung zu Active Directory fehlgeschlagen.";
+			return;
+		}
+
+		if (!$ldap) {
+			$this->adError = "Benutzer wurde im Active Directory nicht gefunden.";
+			return;
+		}
 
 		$lock = $ldap->lockouttime ?? null;
 
-        $pwdLastSet = $ldap->pwdlastset instanceof \Carbon\Carbon ? $ldap->pwdlastset->getTimestamp() : (int)($ldap->pwdlastset ?? 0);
+		$pwdLastSet = $ldap->pwdlastset instanceof \Carbon\Carbon ? $ldap->pwdlastset->getTimestamp() : (int) ($ldap->pwdlastset ?? 0);
 
-        $this->adRequiresPwdChange = ($pwdLastSet === 0);
-    }
+		$this->adRequiresPwdChange = ($pwdLastSet === 0);
+	}
 
     public function generateAdPassword(): void
     {

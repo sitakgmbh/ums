@@ -14,7 +14,7 @@ class Show extends Component
 
     public function mount(AdUser $adUser): void
     {
-        $this->adUser = $adUser;
+		$this->adUser = $adUser->load('lifecycle');
         $this->sapExport = $adUser->sapExport;
     }
 

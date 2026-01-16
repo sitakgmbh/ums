@@ -1,24 +1,29 @@
 <div>
     <div class="card">
         <div class="card-header bg-primary text-white py-1">
-            <strong>KIS</strong>
+            <strong>KIS (NICE)</strong>
         </div>
 
         <div class="card-body">
 
+            {{-- Fehler --}}
             @if($orbisError)
                 <div class="alert alert-danger mb-3">{{ $orbisError }}</div>
             @endif
 
+            {{-- Erfolg --}}
             @if($orbisSuccess)
                 <div class="alert alert-success mb-3">{{ $orbisSuccess }}</div>
             @endif
 
-            {{-- Benutzername + Suche --}}
-            <div class="mb-3">
+            {{-- Suche --}}
+            <div class="mb-0">
                 <label class="form-label mb-1">Benutzername</label>
                 <div class="input-group">
-                    <input type="text" class="form-control" wire:model.defer="orbisUsername">
+                    <input type="text"
+                           class="form-control"
+                           wire:model.defer="orbisUsername">
+
                     <button class="btn btn-primary"
                             wire:click="searchOrbisUser"
                             wire:loading.attr="disabled">
@@ -27,28 +32,24 @@
                 </div>
             </div>
 
-            @if(!$orbisFound)
-                @if(!$orbisError)
-                    <div class="text-muted small">Bitte Benutzer suchen…</div>
-                @endif
-            @else
+            {{-- NUR wenn gefunden --}}
+            @if($orbisFound)
 
-				{{-- Account entsperren --}}
-				<div class="form-check mb-1">
-					<input id="orbisUnlock"
-						   type="checkbox"
-						   class="form-check-input"
-						   wire:model.live="orbisUnlock"
-						   @disabled(!$orbisIsLocked)>
+                {{-- Account entsperren --}}
+                <div class="form-check mt-3 mb-1">
+                    <input id="orbisUnlock"
+                           type="checkbox"
+                           class="form-check-input"
+                           wire:model.live="orbisUnlock"
+                           @disabled(!$orbisIsLocked)>
 
-					<label class="form-check-label" for="orbisUnlock">
-						Account entsperren
-
-						<span class="text-muted small">
-							({{ $orbisIsLocked ? 'gesperrt' : 'nicht gesperrt' }})
-						</span>
-					</label>
-				</div>
+                    <label class="form-check-label" for="orbisUnlock">
+                        Account entsperren
+                        <span class="text-muted small">
+                            ({{ $orbisIsLocked ? 'gesperrt' : 'nicht gesperrt' }})
+                        </span>
+                    </label>
+                </div>
 
                 {{-- Passwort ändern --}}
                 <div class="form-check mb-2">
@@ -89,6 +90,7 @@
                             Passwort beim nächsten Login ändern
                         </label>
                     </div>
+
                 @endif
 
                 {{-- Speichern --}}
@@ -97,9 +99,7 @@
                         wire:loading.attr="disabled"
                         wire:target="saveOrbis">
 
-                    <span wire:loading.remove wire:target="saveOrbis">
-                        Speichern
-                    </span>
+                    <span wire:loading.remove wire:target="saveOrbis">Speichern</span>
 
                     <span wire:loading wire:target="saveOrbis">
                         <span class="spinner-border spinner-border-sm me-1"></span>

@@ -41,7 +41,15 @@
 
 					{{-- Name + Titel --}}
 					<h4 class="mb-0 mt-2">{{ $adUser->display_name ?? $adUser->username }}</h4>
-					<p class="text-muted font-14">{{ $adUser->funktion?->name ?? '-' }}</p>
+					<p class="text-muted font-14 mb-0">
+						{{ $adUser->funktion?->name ?? '-' }}
+					</p>
+
+					@if($adUser->employeeType() !== \App\Enums\AdUserEmployeeType::Unknown)
+						<p class="text-muted font-14 mb-0">
+							{{ $adUser->employeeType()->label() }}
+						</p>
+					@endif
 
 					<div class="pt-3 text-start">
 						<h6 class="text-uppercase text-muted fw-bold border-bottom pb-1 mb-2">Personalien</h6>
@@ -122,17 +130,7 @@
 					<ul class="nav nav-pills bg-nav-pills nav-justified mb-3">
 						<li class="nav-item">
 							<a href="#account" data-bs-toggle="tab" aria-expanded="true" class="nav-link rounded-0 active">
-								Accountinformationen
-							</a>
-						</li>
-						<li class="nav-item">
-							<a href="#groups" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
-								Gruppenmitgliedschaften
-							</a>
-						</li>
-						<li class="nav-item">
-							<a href="#extensions" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
-								Extension Attributes
+								Active Directory
 							</a>
 						</li>
 						<li class="nav-item">
@@ -140,13 +138,22 @@
 								SAP Stammdaten
 							</a>
 						</li>
+						<li class="nav-item">
+							<a href="#lifecycle" data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0">
+								Lifecycle
+							</a>
+						</li>
 					</ul>
 
 					<div class="tab-content">
 
-						{{-- Accountinformationen --}}
+						{{-- AD-Benutzer --}}
 						<div class="tab-pane fade show active" id="account">
-							<dl class="row mb-0">
+
+							<h6 class="text-uppercase text-muted fw-bold border-bottom pb-1 mb-2"> Accountinformationen </h6>
+
+							{{-- Basis --}}
+							<dl class="row mb-3">
 								<dt class="col-sm-4">Benutzername</dt>
 								<dd class="col-sm-6">{{ $adUser->username ?? '-' }}</dd>
 
@@ -166,39 +173,83 @@
 								<dd class="col-sm-6">{{ $adUser->logon_count }}</dd>
 
 								<dt class="col-sm-4">Status</dt>
-								<dd class="col-sm-6">{!! $adUser->is_enabled ? '<span class="badge bg-success">Aktiviert</span>' : '<span class="badge bg-secondary">Deaktiviert</span>' !!}
+								<dd class="col-sm-6">
+									{!! $adUser->is_enabled
+										? '<span class="badge bg-success">Aktiviert</span>'
+										: '<span class="badge bg-secondary">Deaktiviert</span>'
+									!!}
 								</dd>
 
 								<dt class="col-sm-4">Passwort läuft nie ab</dt>
-								<dd class="col-sm-6 mb-0">{!! $adUser->password_never_expires ? '<span class="badge bg-success">Ja</span>' : '<span class="badge bg-secondary">Nein</span>' !!}</dd>
+								<dd class="col-sm-6 mb-0">
+									{!! $adUser->password_never_expires
+										? '<span class="badge bg-success">Ja</span>'
+										: '<span class="badge bg-secondary">Nein</span>'
+									!!}
+								</dd>
 							</dl>
-						</div>
 
-						{{-- Gruppenmitgliedschaften --}}
-						<div class="tab-pane fade" id="groups">
-							@if (!empty($adUser->member_of))
-								<ul class="list-group list-group-flush mb-0">
-									@foreach (collect($adUser->member_of)->sort()->values() as $group)
-										<li class="list-group-item py-1 px-2">{{ $group }}</li>
-									@endforeach
-								</ul>
-							@else
-								<p class="text-muted mb-0">Keine Gruppenmitgliedschaften gefunden.</p>
-							@endif
-						</div>
 
-						{{-- Erweiterte Attribute --}}
-						<div class="tab-pane fade" id="extensions">
-							<dl class="row mb-0">
-								@foreach(range(1, 15) as $i)
-									@php $key = "extensionattribute{$i}"; @endphp
+							<h6 class="text-uppercase text-muted fw-bold border-bottom pb-1 mb-2"> Details </h6>
 
-									<dt class="col-sm-2 {{ $loop->last ? 'mb-0' : '' }}">extensionAttribute{{ $i }}</dt>
-									<dd class="col-sm-10 {{ $loop->last ? 'mb-0' : 'mb-1' }}">
-										{{ $adUser->$key ?? '-' }}
-									</dd>
-								@endforeach
-							</dl>
+							<div class="d-flex gap-2 mb-0">
+								<button class="btn btn-sm btn-outline-light"
+										data-bs-toggle="collapse"
+										data-bs-target="#collapseGroups">
+									Gruppenmitgliedschaften
+								</button>
+
+								<button class="btn btn-sm btn-outline-light"
+										data-bs-toggle="collapse"
+										data-bs-target="#collapseExtensions">
+									Extension Attributes
+								</button>
+							</div>
+
+							{{-- Gruppenmitgliedschaften --}}
+							<div id="collapseGroups" class="collapse mt-3 mb-0">
+								<h6 class="text-uppercase text-muted fw-bold border-bottom pb-1 mb-2">
+									Gruppenmitgliedschaften
+								</h6>
+
+								@if (!empty($adUser->member_of))
+									<ul class="list-group list-group-flush mb-0">
+										@foreach (collect($adUser->member_of)->sort()->values() as $group)
+											<li class="list-group-item py-1 px-2">{{ $group }}</li>
+										@endforeach
+									</ul>
+								@else
+									<p class="text-muted mb-0">Keine Gruppen gefunden.</p>
+								@endif
+							</div>
+
+
+							{{-- Extension Attributes --}}
+							<div id="collapseExtensions" class="collapse mt-3 mb-0">
+								<h6 class="text-uppercase text-muted fw-bold border-bottom pb-1 mb-2">
+									Extension Attributes
+								</h6>
+
+								@php
+									$ext = collect(range(1,15))->map(fn($i) => "extensionattribute{$i}");
+									$hasExt = $ext->contains(fn($k) => filled($adUser->$k));
+								@endphp
+
+								@if(!$hasExt)
+									<p class="text-muted mb-0">Keine Extension Attributes gesetzt.</p>
+								@else
+									<dl class="row mb-0">
+										@foreach($ext as $key)
+											@php $val = $adUser->$key; @endphp
+											@if(filled($val))
+												<dt class="col-sm-3">{{ $key }}</dt>
+												<dd class="col-sm-9 mb-1">{{ $val }}</dd>
+											@endif
+										@endforeach
+									</dl>
+								@endif
+							</div>
+
 						</div>
 
 						{{-- SAP Stammdaten --}}
@@ -218,7 +269,109 @@
 								<p class="text-muted mb-0">Keine SAP-Stammdaten gefunden.</p>
 							@endif
 						</div>
-						
+
+
+
+						{{-- Lifecycle --}}
+						@php
+							$eventIcons = [
+								'ad_user_created'          => ['icon' => 'mdi-account-plus',         'class' => 'bg-success-lighten text-success'],
+								'personal_number_assigned' => ['icon' => 'mdi-card-account-details', 'class' => 'bg-info-lighten text-info'],
+								'mutation_created'         => ['icon' => 'mdi-file-document-edit',   'class' => 'bg-primary-lighten text-primary'],
+								'ad_user_change'           => ['icon' => 'mdi-pencil',               'class' => 'bg-warning-lighten text-warning'],
+								'termination_registered'   => ['icon' => 'mdi-account-remove',       'class' => 'bg-danger-lighten text-danger'],
+								'ad_user_disabled'         => ['icon' => 'mdi-account-off',          'class' => 'bg-secondary-lighten text-secondary'],
+								'ad_user_deleted'          => ['icon' => 'mdi-account-cancel',       'class' => 'bg-dark text-light'],
+							];
+
+							$defaultIcon = ['icon' => 'mdi-information', 'class' => 'bg-light text-muted'];
+
+							$events = $adUser->lifecycle->sortByDesc('created_at');
+							$latest = $events->first();
+						@endphp
+
+
+						<div class="tab-pane fade" id="lifecycle">
+
+							@if(!$latest)
+								<p class="text-muted mb-0">Noch keine Lifecycle-Eintraege vorhanden.</p>
+							@else
+
+								<span class="text-muted small mb-3 d-inline-block">
+									Letzte Änderung: {{ $latest->created_at->format('d.m.Y H:i') }}
+								</span>
+
+								<div class="timeline-alt py-0">
+
+									@foreach($events as $event)
+
+										@php
+											$meta = $eventIcons[$event->event] ?? $defaultIcon;
+											$hasContext = filled($event->context);
+											$isLast = $loop->last;
+										@endphp
+
+										<div class="timeline-item {{ $isLast ? 'pb-0' : '' }}">
+											<i class="mdi {{ $meta['icon'] }} {{ $meta['class'] }} timeline-icon"></i>
+
+											<div class="timeline-item-info">
+
+												<span class="fw-bold d-block mb-0">
+													{{ $event->event_label }}
+												</span>
+
+												<p class="mb-2">
+													<small class="text-muted">
+														{{ $event->created_at->diffForHumans() }}
+													</small>
+												</p>
+
+												@if($event->description)
+													<small class="d-block text-muted mb-1">{{ $event->description }}</small>
+												@endif
+
+												@if($hasContext)
+													<span
+														class="text-info small d-inline-flex align-items-center mb-1"
+														role="button"
+														data-bs-toggle="collapse"
+														data-bs-target="#ctx-{{ $event->id }}"
+														style="cursor:pointer;"
+													>
+														<i class="mdi mdi-information-outline"></i>
+													</span>
+
+													<div id="ctx-{{ $event->id }}" class="collapse mt-2 mb-2">
+														<pre class="small bg-light p-2 rounded mb-0" style="font-size:12px; white-space:pre;">{{ rtrim(json_encode($event->context, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) }}</pre>
+													</div>
+												@else
+													<span
+														class="text-muted small d-inline-flex align-items-center mb-1"
+														style="opacity:0.4; cursor:not-allowed;"
+													>
+														<i class="mdi mdi-information-outline"></i>
+													</span>
+												@endif
+
+											</div>
+										</div>
+
+									@endforeach
+
+								</div>
+
+							@endif
+
+						</div>
+
+
+
+
+
+
+
+
+
 						
 					</div> <!-- end tab-content -->
 				</div>
