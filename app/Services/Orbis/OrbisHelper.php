@@ -97,6 +97,14 @@ class OrbisHelper
         return null;
     }
 
+	public function getUserById(int $id): ?array
+	{
+		$url = $this->client->getBaseUrl() . "/resources/external/users/{$id}";
+		$resp = $this->client->send($url, "GET");
+
+		return is_array($resp) && isset($resp['id']) ? $resp : null;
+	}
+
     public function getEmployeeByUserId($userId, string $today)
     {
         $url = $this->client->getBaseUrl() . "/resources/external/users/{$userId}/employees?referencedate={$today}&includecatalogtranslations=true";
