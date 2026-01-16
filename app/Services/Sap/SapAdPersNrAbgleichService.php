@@ -6,6 +6,8 @@ use App\Models\AdUser;
 use App\Models\SapExport;
 use App\Utils\Logging\Logger;
 use LdapRecord\Models\ActiveDirectory\User as LdapUser;
+use App\Models\EmployeeLifecycle;
+use App\Enums\EmployeeLifecycleEvent;
 
 class SapAdPersNrAbgleichService
 {
@@ -78,6 +80,28 @@ class SapAdPersNrAbgleichService
                             "beschreibung" => $batchbezSAP,
                         ],
                     ]);
+
+					$dbUser = AdUser::where('username', $username)->first();
+
+					if ($dbUser) {
+						EmployeeLifecycle::create([
+							'ad_user_id'  => $dbUser->id,
+							'event'       => EmployeeLifecycleEvent::AdUserChange->value,
+							'description' => "Personalnummer wurde gesetzt ({$pn}).",
+							'context'     => [
+								"username"      => $username,
+								"alte_initials" => "99999",
+								"neue_initials" => $pn,
+								"matched_by"    => [
+									"vorname"      => $vornameSAP,
+									"nachname"     => $nachnameSAP,
+									"beschreibung" => $batchbezSAP,
+								],
+								"source" => "SapAdPersNrAbgleichService",
+							],
+							'event_at'    => now(),
+						]);
+					}
 
                     break;
 

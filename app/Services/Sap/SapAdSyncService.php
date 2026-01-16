@@ -2,13 +2,16 @@
 
 namespace App\Services\Sap;
 
+use LdapRecord\Models\ActiveDirectory\User as LdapUser;
 use App\Utils\Logging\Logger;
 use App\Utils\UserHelper;
 use App\Models\Setting;
 use App\Models\Mutation;
 use App\Models\AdUser;
 use App\Models\SapExport;
-use LdapRecord\Models\ActiveDirectory\User as LdapUser;
+use App\Models\AdUser as LocalAdUser;
+use App\Models\EmployeeLifecycle;
+use App\Enums\EmployeeLifecycleEvent;
 
 class SapAdSyncService
 {
@@ -120,15 +123,30 @@ class SapAdSyncService
 
 			if (!empty($this->changes)) 
 			{
-				Logger::db("sap", "info", "Benutzer '{$username}' aktualisiert", [
+				$context = [
 					"personalnummer" => $personalnummer,
-					"username" => $username,
-					"changes" => $this->changes,
-				]);
-				
+					"username"       => $username,
+					"changes"        => $this->changes,
+					"source"         => "sap_sync",
+				];
+
+				Logger::db("sap", "info", "Benutzer '{$username}' aktualisiert", $context);
+
+				$dbUser = LocalAdUser::where('username', $username)->first();
+
+				if ($dbUser) {
+					EmployeeLifecycle::create([
+						'ad_user_id'  => $dbUser->id,
+						'event'       => EmployeeLifecycleEvent::AdUserChange->value,
+						'description' => "Der AD-Benutzer '{$username}' wurde aktualisiert.",
+						'context'     => $context,
+						'event_at'    => now(),
+					]);
+				}
+
 				$this->stats["updated"]++;
 				$this->changes = [];
-			} 
+			}
 			else 
 			{
 				$this->stats["no_changes"]++;

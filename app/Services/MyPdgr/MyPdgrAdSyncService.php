@@ -128,7 +128,6 @@ class MyPdgrAdSyncService
                     "actor" => $this->actor,
                 ]);
 
-				// Lifecycle mitschreiben
 				$dbUser = LocalAdUser::where('username', $username)->first();
 
 				if ($dbUser) 
