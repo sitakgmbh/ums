@@ -815,16 +815,15 @@ class OrbisHelper
 		);
 
 		if (!is_array($existing) || empty($existing['id'])) {
-			Logger::error("unlockUser(): User {$userId} nicht gefunden.");
 			return false;
 		}
 
 		$payload = [
-			'id' => $existing['id'],
-			'name' => $existing['name'],
+			'id'         => $existing['id'],
+			'name'       => $existing['name'],
 			'validityperiod' => $existing['validityperiod'],
-			'locked' => false,
-			'password' => '', // wichtig: zwingend mitsenden
+			'locked'     => false,
+			'password'   => '', // muss immer gesendet werden
 		];
 
 		$resp = $this->client->send(
@@ -833,12 +832,6 @@ class OrbisHelper
 			$payload
 		);
 
-		if (!$this->isValidOrbisResponse($resp)) {
-			return false;
-		}
-
-		return true;
+		return $resp !== null;
 	}
-
-
 }
