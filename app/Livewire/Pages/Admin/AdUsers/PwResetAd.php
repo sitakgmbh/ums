@@ -15,14 +15,16 @@ class PwResetAd extends Component
     public string $adUsername = '';
     public string $adPassword = '';
 
+    // UI Toggles
     public bool $adUnlock = false;
-    public bool $adToggleActive = false;
-    public bool $adTogglePwdChange = false;
+    public bool $adChangePassword = false;
+    public bool $adForcePwdChange = false;
 
+    // AD Status
     public bool $adIsLocked = false;
-    public bool $adIsDisabled = false;
     public bool $adRequiresPwdChange = false;
 
+    // Feedback
     public ?string $adError = null;
     public ?string $adSuccess = null;
 
@@ -36,31 +38,19 @@ class PwResetAd extends Component
     private function loadAdStatus(): void
     {
         $svc = new AdUserService();
-
-		if (!$svc->isReachable()) 
-		{
-			$this->adError = "Active Directory momentan nicht erreichbar.";
-			return;
-		}
-
         $ldap = $svc->findByGuid($this->adUser->guid);
 
-        if (!$ldap) 
-		{
+        if (!$ldap) {
             return;
         }
 
-        $uac = (int)($ldap->userAccountControl[0] ?? 0);
-
         $this->adIsLocked = ($ldap->lockouttime > 0);
-        $this->adIsDisabled = (($uac & 2) === 2);
 
-        $pwdLastSet = $ldap->pwdlastset instanceof \Carbon\Carbon ? $ldap->pwdlastset->getTimestamp() : (int)($ldap->pwdlastset ?? 0);
+        $pwdLastSet = $ldap->pwdlastset instanceof \Carbon\Carbon
+            ? $ldap->pwdlastset->getTimestamp()
+            : (int)($ldap->pwdlastset ?? 0);
+
         $this->adRequiresPwdChange = ($pwdLastSet === 0);
-
-        $this->adToggleActive = false;
-        $this->adUnlock = $this->adIsLocked;
-        $this->adTogglePwdChange = false;
     }
 
     public function generateAdPassword(): void
@@ -70,27 +60,38 @@ class PwResetAd extends Component
 
     private function logAdFailure(string $error): void
     {
-        Logger::db("ad", "error", "Passwort-Änderung '{$this->adUsername}' fehlgeschlagen", [
-            "unlock"   => $this->adUnlock       ? true : null,
-            "active"   => $this->adToggleActive ? true : null,
-            "must_pwd" => $this->adTogglePwdChange ? true : null,
-            "pw_set"   => trim($this->adPassword) !== '' ? true : null,
-            "actor"    => auth()->user()?->username ?? null,
-            "ip"       => request()->ip(),
-            "agent"    => request()->userAgent() ?: null,
-            "error"    => $error,
+        Logger::db("ad", "error", "AD Aktion '{$this->adUsername}' fehlgeschlagen", [
+            "unlock"     => $this->adUnlock ?: null,
+            "pw_change"  => $this->adChangePassword ?: null,
+            "force_pw"   => $this->adForcePwdChange ?: null,
+            "actor"      => auth()->user()?->username,
+            "ip"         => request()->ip(),
+            "agent"      => request()->userAgent(),
+            "error"      => $error,
+        ]);
+    }
+
+    private function logAdSuccess(): void
+    {
+        Logger::db("ad", "info", "AD Aktion '{$this->adUsername}' erfolgreich", [
+            "unlock"     => $this->adUnlock ?: null,
+            "pw_change"  => $this->adChangePassword ?: null,
+            "force_pw"   => $this->adForcePwdChange ?: null,
+            "actor"      => auth()->user()?->username,
+            "ip"         => request()->ip(),
+            "agent"      => request()->userAgent(),
         ]);
     }
 
     public function saveAd(): void
     {
-        $this->resetMessages();
+        $this->adError = null;
+        $this->adSuccess = null;
 
         $svc = new AdUserService();
         $ldap = $svc->findByGuid($this->adUser->guid);
 
-        if (!$ldap) 
-		{
+        if (!$ldap) {
             $this->logAdFailure("Benutzer nicht im AD gefunden");
             $this->adError = "Benutzer nicht im AD gefunden.";
             return;
@@ -98,95 +99,60 @@ class PwResetAd extends Component
 
         $changed = false;
 
-        if ($this->adUnlock && $this->adIsLocked) 
-		{
+        // Unlock
+        if ($this->adUnlock && $this->adIsLocked) {
             $r = $svc->unlock($ldap);
-			
-            if ($r !== true) 
-			{
-                $this->logAdFailure($r);
-                $this->adError = $r;
-                return;
-            }
-			
-            $changed = true;
-        }
 
-        if ($this->adToggleActive) 
-		{
-            $r = $this->adIsDisabled ? $svc->enable($ldap) : $svc->disable($ldap);
-			
-            if ($r !== true) 
-			{
-                $this->logAdFailure($r);
-                $this->adError = $r;
-                return;
-            }
-			
-            $changed = true;
-        }
-
-        if ($this->adTogglePwdChange) 
-		{
-            $r = $this->adRequiresPwdChange ? $svc->clearForceChange($ldap) : $svc->forceChangeOnNextLogin($ldap);
-			
-            if ($r !== true) 
-			{
-                $this->logAdFailure($r);
-                $this->adError = $r;
-                return;
-            }
-			
-            $changed = true;
-        }
-
-        if (trim($this->adPassword) !== '') 
-		{
-            $this->validate([
-                'adPassword' => 'min:8'
-            ], [
-                'adPassword.min' => 'Das Passwort muss mindestens 8 Zeichen lang sein.'
-            ]);
-
-            $r = $svc->resetPassword($ldap, $this->adPassword);
-			
-            if ($r !== true) 
-			{
+            if ($r !== true) {
                 $this->logAdFailure($r);
                 $this->adError = $r;
                 return;
             }
 
-            $this->adPassword = '';
             $changed = true;
+            $this->adUnlock = false;
         }
 
-        if ($changed) 
-		{
-            Logger::db("ad", "info", "Passwort-Änderung '{$this->adUsername}' erfolgreich", [
-                "unlock"   => $this->adUnlock       ? true : null,
-                "active"   => $this->adToggleActive ? true : null,
-                "must_pwd" => $this->adTogglePwdChange ? true : null,
-                "pw_set"   => trim($this->adPassword) !== '' ? true : null,
-                "actor"    => auth()->user()?->username ?? null,
-                "ip"       => request()->ip(),
-                "agent"   => request()->userAgent() ?: null,
-            ]);
+		// 2) Passwort ändern
+		if ($this->adChangePassword) {
+			$pw = trim($this->adPassword);
 
-            $this->adSuccess = "Änderungen erfolgreich gespeichert.";
+			if ($pw === '') {
+				$this->adError = "Bitte Passwort eingeben.";
+				return;
+			}
+
+			if (strlen($pw) < 8) {
+				$this->adError = "Das Passwort muss mindestens 8 Zeichen lang sein.";
+				return;
+			}
+
+			$r = $svc->resetPassword($ldap, $pw);
+
+			if ($r !== true) {
+				$this->logAdFailure($r);
+				$this->adError = $r;
+				return;
+			}
+
+			if ($this->adForcePwdChange) {
+				$svc->forceChangeOnNextLogin($ldap);
+			} else {
+				$svc->clearForceChange($ldap);
+			}
+
+			$this->adPassword = '';
+			$changed = true;
+		}
+
+
+        if ($changed) {
+            $this->logAdSuccess();
+            $this->adSuccess = "Aenderungen gespeichert.";
             $this->loadAdStatus();
+        } else {
+            $this->adSuccess = "Keine Aenderungen vorgenommen.";
         }
-		else 
-		{
-            $this->adSuccess = "Keine Änderungen vorgenommen.";
-        }
-    }
-
-    private function resetMessages(): void
-    {
-        $this->resetErrorBag();
-        $this->adError = null;
-        $this->adSuccess = null;
     }
 
     public function render()

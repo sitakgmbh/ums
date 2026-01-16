@@ -14,7 +14,7 @@
         @endif
 
         <label class="form-label mb-1">Benutzername</label>
-        <div class="input-group mb-0">
+        <div class="input-group mb-2">
             <input type="text" class="form-control" wire:model.defer="orbisUsername">
             <button class="btn btn-primary" wire:click="searchOrbisUser" wire:loading.attr="disabled">
                 <i class="mdi mdi-magnify"></i>
@@ -23,80 +23,63 @@
 
         @if($orbisFound)
 
-            <label class="form-label mt-2">Neues Passwort</label>
-            <div class="input-group mb-2">
-                <input type="text" class="form-control" wire:model.defer="orbisPassword">
-                <button class="btn btn-primary" wire:click="generateOrbisPassword">
-                    <i class="mdi mdi-autorenew"></i>
-                </button>
+            {{-- Unlock --}}
+            <div class="form-check mb-3">
+                <input id="orbisUnlock"
+                       type="checkbox"
+                       class="form-check-input"
+                       wire:model="orbisUnlock"
+                       @disabled(!$orbisIsLocked)>
+
+                <label class="form-check-label" for="orbisUnlock">
+                    Account entsperren
+                    @unless($orbisIsLocked)
+                        <span class="text-muted small">(nicht gesperrt)</span>
+                    @endunless
+                </label>
             </div>
 
-            <label class="form-label">Account</label>
-            <div class="mb-2">
-                <div class="form-check">
-                    <input class="form-check-input"
-                           type="radio"
-                           wire:model="orbisLockedPending"
-                           value="0"
-                           id="orbisUnlocked">
-                    <label class="form-check-label" for="orbisUnlocked">
-                        Entsperrt
-                        @if(!$orbisLockedCurrent)
-                            <span class="text-muted small">(aktuell)</span>
-                        @endif
-                    </label>
-                </div>
+            {{-- Password change --}}
+            <div class="form-check mb-2">
+                <input id="orbisChangePassword"
+                       type="checkbox"
+                       class="form-check-input"
+                       wire:model="orbisChangePassword">
 
-                <div class="form-check">
-                    <input class="form-check-input"
-                           type="radio"
-                           wire:model="orbisLockedPending"
-                           value="1"
-                           id="orbisLocked">
-                    <label class="form-check-label" for="orbisLocked">
-                        Gesperrt
-                        @if($orbisLockedCurrent)
-                            <span class="text-muted small">(aktuell)</span>
-                        @endif
-                    </label>
-                </div>
+                <label class="form-check-label" for="orbisChangePassword">
+                    Passwort ändern
+                </label>
             </div>
 
-
-            <label class="form-label">Passwort bei nächster Anmeldung ändern</label>
-            <div class="mb-3">
-                <div class="form-check">
-                    <input class="form-check-input"
-                           type="radio"
-                           wire:model="orbisMustChangePending"
-                           value="0"
-                           id="pwNoChange">
-                    <label class="form-check-label" for="pwNoChange">
-                        Deaktiviert
-                        @if(!$orbisMustChangeCurrent)
-                            <span class="text-muted small">(aktuell)</span>
-                        @endif
-                    </label>
+            @if($orbisChangePassword)
+                <div class="mb-3">
+                    <label class="form-label mb-1">Neues Passwort</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" wire:model.defer="orbisPassword">
+                        <button class="btn btn-primary" type="button" wire:click="generateOrbisPassword">
+                            <i class="mdi mdi-autorenew"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="form-check">
-                    <input class="form-check-input"
-                           type="radio"
-                           wire:model="orbisMustChangePending"
-                           value="1"
-                           id="pwMustChange">
-                    <label class="form-check-label" for="pwMustChange">
-                        Aktiviert
-                        @if($orbisMustChangeCurrent)
-                            <span class="text-muted small">(aktuell)</span>
-                        @endif
+                <div class="form-check mb-3">
+                    <input id="orbisForcePwdChange"
+                           type="checkbox"
+                           class="form-check-input"
+                           wire:model="orbisForcePwdChange">
+
+                    <label class="form-check-label" for="orbisForcePwdChange">
+                        Passwort beim nächsten Login ändern
                     </label>
                 </div>
-            </div>
+            @endif
 
-            <button class="btn btn-primary" wire:click="saveOrbis" wire:loading.attr="disabled">
-                <span wire:loading.remove wire:target="saveOrbis">Speichern</span>
-                <span wire:loading wire:target="saveOrbis">
+            {{-- Save --}}
+            <button class="btn btn-primary"
+                    wire:click="saveOrbis"
+                    wire:loading.attr="disabled">
+                <span wire:loading.remove>Speichern</span>
+                <span wire:loading>
                     <span class="spinner-border spinner-border-sm me-1"></span>
                     Bitte warten…
                 </span>

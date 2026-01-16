@@ -753,7 +753,7 @@ class OrbisHelper
 		);
 	}
 
-	public function resetUserPw(int $userId, string $newPassword, bool $locked, bool $mustChange): bool
+	public function resetUserPw(int $userId, string $newPassword, bool $mustChange): bool
 	{
 		$existing = $this->client->send(
 			$this->client->getBaseUrl() . "/resources/external/users/{$userId}"
@@ -769,8 +769,6 @@ class OrbisHelper
 			'id' => $existing['id'],
 			'name' => $existing['name'],
 			'validityperiod' => $existing['validityperiod'],
-			'canceled' => $existing['canceled'] ?? false,
-			'locked' => $locked,
 			'mustchangepassword' => $mustChange,
 			'password' => base64_encode($newPassword)
 		];
@@ -801,5 +799,38 @@ class OrbisHelper
 
 		return true;
 	}
+
+	public function unlockUser(int $userId): bool
+	{
+		$existing = $this->client->send(
+			$this->client->getBaseUrl() . "/resources/external/users/{$userId}"
+		);
+
+		if (!is_array($existing) || empty($existing['id'])) {
+			Logger::error("unlockUser(): User {$userId} nicht gefunden.");
+			return false;
+		}
+
+		$payload = [
+			'id' => $existing['id'],
+			'name' => $existing['name'],
+			'validityperiod' => $existing['validityperiod'],
+			'locked' => false,
+			'password' => '', // wichtig: zwingend mitsenden
+		];
+
+		$resp = $this->client->send(
+			$this->client->getBaseUrl() . "/resources/external/users",
+			"PUT",
+			$payload
+		);
+
+		if (!$this->isValidOrbisResponse($resp)) {
+			return false;
+		}
+
+		return true;
+	}
+
 
 }

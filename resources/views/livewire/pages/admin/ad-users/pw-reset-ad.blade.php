@@ -1,7 +1,6 @@
 <div>
-
     <div class="card">
-        <div class="card-header text-white bg-primary py-1">
+        <div class="card-header bg-primary text-white py-1">
             <strong>Active Directory</strong>
         </div>
 
@@ -15,35 +14,22 @@
                 <div class="alert alert-success mb-3">{{ $adSuccess }}</div>
             @endif
 
-            <div class="mb-2">
+            <div class="mb-3">
                 <label class="form-label mb-1">Benutzername</label>
-                <input type="text"
-                       class="form-control"
-                       value="{{ $adUsername }}"
-                       disabled>
+                <input type="text" class="form-control" value="{{ $adUsername }}" disabled>
             </div>
 
-            <div class="mb-2">
-                <label class="form-label mb-1">Neues Passwort</label>
-                <div class="input-group">
-                    <input type="text"
-                           class="form-control"
-                           wire:model.defer="adPassword">
-                    <button type="button"
-                            class="btn btn-primary"
-                            wire:click="generateAdPassword">
-                        <i class="mdi mdi-autorenew"></i>
-                    </button>
-                </div>
-            </div>
-
+            {{-- Unlock --}}
             <div class="form-check mb-1">
-                <input id="adUnlock"
-                       type="checkbox"
-                       class="form-check-input"
-                       wire:model="adUnlock"
-                       @disabled(!$adIsLocked)>
-                <label for="adUnlock" class="form-check-label">
+                <input
+                    id="adUnlock"
+                    type="checkbox"
+                    class="form-check-input"
+                    wire:model.live="adUnlock"
+                    @disabled(!$adIsLocked)
+                >
+
+                <label class="form-check-label" for="adUnlock">
                     Account entsperren
                     @unless($adIsLocked)
                         <span class="text-muted small">(nicht gesperrt)</span>
@@ -51,37 +37,50 @@
                 </label>
             </div>
 
-            <div class="form-check mb-1">
-                <input id="adToggleActive"
-                       type="checkbox"
-                       class="form-check-input"
-                       wire:model="adToggleActive">
-                <label for="adToggleActive" class="form-check-label">
-                    @if($adIsDisabled)
-                        Account aktivieren <span class="text-muted small">(deaktiviert)</span>
-                    @else
-                        Account deaktivieren <span class="text-muted small">(aktiviert)</span>
-                    @endif
+            {{-- Passwort ändern --}}
+            <div class="form-check mb-2">
+                <input
+                    id="adChangePassword"
+                    type="checkbox"
+                    class="form-check-input"
+                    wire:model.live="adChangePassword"
+                >
+
+                <label class="form-check-label" for="adChangePassword">
+                    Passwort ändern
                 </label>
             </div>
 
-            <div class="form-check mb-3">
-                <input id="adTogglePwdChange"
-                       type="checkbox"
-                       class="form-check-input"
-                       wire:model="adTogglePwdChange">
-                <label for="adTogglePwdChange" class="form-check-label">
-                    @if($adRequiresPwdChange)
-                        'Passwort beim nächsten Login ändern' deaktivieren
-                        <span class="text-muted small">(aktiviert)</span>
-                    @else
-                        'Passwort beim nächsten Login ändern' aktivieren
-                        <span class="text-muted small">(deaktiviert)</span>
-                    @endif
-                </label>
-            </div>
+            @if($adChangePassword)
+                <div class="mb-1">
+                    <label class="form-label mb-1">Neues Passwort</label>
+                    <div class="input-group">
+                        <input type="text"
+                               class="form-control"
+                               wire:model.defer="adPassword">
 
-            <button class="btn btn-primary"
+                        <button class="btn btn-primary"
+                                type="button"
+                                wire:click="generateAdPassword">
+                            <i class="mdi mdi-autorenew"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-check mb-2">
+                    <input
+                        id="adForcePwdChange"
+                        type="checkbox"
+                        class="form-check-input"
+                        wire:model.live="adForcePwdChange"
+                    >
+                    <label class="form-check-label" for="adForcePwdChange">
+                        Passwort beim nächsten Login ändern
+                    </label>
+                </div>
+            @endif
+
+            <button class="btn btn-primary mt-2"
                     wire:click="saveAd"
                     wire:loading.attr="disabled"
                     wire:target="saveAd">
@@ -95,8 +94,6 @@
                     Bitte warten…
                 </span>
             </button>
-
         </div>
     </div>
-
 </div>
