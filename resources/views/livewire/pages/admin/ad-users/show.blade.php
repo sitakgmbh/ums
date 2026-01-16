@@ -286,7 +286,7 @@
 
 							$defaultIcon = ['icon' => 'mdi-information', 'class' => 'bg-light text-muted'];
 
-							$events = $adUser->lifecycle->sortByDesc('event_at');
+							$events = $adUser->lifecycle->sortBy('event_at');
 							$latest = $events->first();
 						@endphp
 
