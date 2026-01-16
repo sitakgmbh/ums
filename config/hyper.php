@@ -26,11 +26,6 @@ return [
             'title' => 'Admin',
             'items' => [
                 [
-                    'label' => 'Incidents',
-                    'url' => '/admin/incidents',
-                    'icon' => 'mdi mdi-alert',
-                ],
-                [
                     'label' => 'Verarbeitung Anträge',
                     'icon'  => 'mdi mdi-hammer-screwdriver',
                     'children' => [
@@ -57,6 +52,11 @@ return [
                     'label' => 'SAP Export',
                     'url' => '/admin/sap-export',
                     'icon' => 'mdi mdi-file-account',
+                ],
+                [
+                    'label' => 'Incidents',
+                    'url' => '/admin/incidents',
+                    'icon' => 'mdi mdi-lightning-bolt',
                 ],
                 [
                     'label' => 'Systemsteuerung',

@@ -41,9 +41,11 @@
 
 					{{-- Name + Titel --}}
 					<h4 class="mb-0 mt-2">{{ $adUser->display_name ?? $adUser->username }}</h4>
-					<p class="text-muted font-14 mb-0">
-						{{ $adUser->funktion?->name ?? '-' }}
-					</p>
+					@if($adUser->funktion?->name)
+						<p class="text-muted font-14 mb-0">
+							{{ $adUser->funktion->name }}
+						</p>
+					@endif
 
 					@if($adUser->employeeType() !== \App\Enums\AdUserEmployeeType::Unknown)
 						<p class="text-muted font-14 mb-0">
