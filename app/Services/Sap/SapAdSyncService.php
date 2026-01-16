@@ -127,7 +127,7 @@ class SapAdSyncService
 					"personalnummer" => $personalnummer,
 					"username"       => $username,
 					"changes"        => $this->changes,
-					"source"         => "sap_sync",
+					"source"         => "SapAdSyncService",
 				];
 
 				Logger::db("sap", "info", "Benutzer '{$username}' aktualisiert", $context);

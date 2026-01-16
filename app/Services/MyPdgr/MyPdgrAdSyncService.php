@@ -118,15 +118,18 @@ class MyPdgrAdSyncService
             $this->stats["found"]++;
             $this->syncAddressAttributes($adUser, $MyPdgrEntry, $username, $initials);
 
-            if (!empty($this->changes)) 
+			if (!empty($this->changes)) 
 			{
-                Logger::db("mypdgr", "info", "Benutzer '{$username}' aktualisiert", [
-                    "personalnummer" => $initials,
-                    "username" => $username,
-                    "displayname" => $displayName,
-                    "changes" => $this->changes,
-                    "actor" => $this->actor,
-                ]);
+				$context = [
+					"personalnummer" => $initials,
+					"username"       => $username,
+					"displayname"    => $displayName,
+					"changes"        => $this->changes,
+					"actor"          => $this->actor,
+					"source"         => "MyPdgrAdSyncService",
+				];
+
+				Logger::db("mypdgr", "info", "Benutzer '{$username}' aktualisiert", $context);
 
 				$dbUser = LocalAdUser::where('username', $username)->first();
 
@@ -141,8 +144,8 @@ class MyPdgrAdSyncService
 					]);
 				}
 
-                $this->stats["updated"]++;
-            } 
+				$this->stats["updated"]++;
+			}
 			else 
 			{
                 $this->stats["no_changes"]++;

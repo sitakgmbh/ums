@@ -45,7 +45,7 @@ class AdUserObserver
             'event'       => EmployeeLifecycleEvent::AdUserCreated->value,
             'description' => "Der AD-Benutzer '{$user->username}' wurde erstellt.",
             'context'     => [
-                'source' => 'observer',
+                'source' => 'AdUserObserver',
             ],
             'event_at' => $user->created,
         ]);
