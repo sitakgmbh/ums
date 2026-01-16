@@ -39,6 +39,8 @@ class GenerateAdCreationLifecycle extends Command
 				'context'     => [
 					'info' => 'Dieser Eintrag wurde nachträglich erstellt.',
 				],
+				'created_at'  => $user->when_created,
+				'updated_at'  => $user->when_created,
 			]);
 
 			$this->info("Added: {$user->username}");
