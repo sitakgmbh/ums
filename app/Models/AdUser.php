@@ -88,7 +88,7 @@ class AdUser extends Model
     ];
 
     protected $casts = [
-	    'employee_type' => \App\Enums\AdUserEmployeeType::class,
+	    'employee_type' => AdUserEmployeeType::class,
         "is_enabled" => "boolean",
         "is_existing" => "boolean",
         "password_never_expires" => "boolean",
@@ -155,4 +155,8 @@ class AdUser extends Model
 		return $this->employee_type ?? AdUserEmployeeType::Unknown;
 	}
 
+	public function getEmployeeTypeValueAttribute(): string
+	{
+		return $this->employee_type?->value ?? 'unknown';
+	}
 }

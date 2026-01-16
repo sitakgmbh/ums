@@ -199,6 +199,19 @@ abstract class BaseTable extends Component
             }
         }
 
+		// normalize value for badge lookup
+		if (is_bool($value)) {
+			$value = (int) $value;
+		}
+
+		if ($value instanceof \BackedEnum) {
+			$value = $value->value;
+		}
+
+		if ($value === null) {
+			$value = 'null';
+		}
+
         // Badges
         if ($badge = $this->getColumnBadges()[$field][$value] ?? null) 
 		{
