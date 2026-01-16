@@ -209,8 +209,8 @@ class AdUsersTable extends BaseTable
                 "icon"   => self::TYPE_ICONS['external'],
                 "class"  => $this->showEmplTypeExternal ? "btn-light" : "btn-outline-light",
                 "title"  => $this->showEmplTypeExternal
-                    ? "Externe ausblenden"
-                    : "Externe anzeigen",
+                    ? "Externe Mitarbeiter ausblenden"
+                    : "Externe Mitarbeiter anzeigen",
             ],
 
             // TEST
@@ -249,8 +249,8 @@ class AdUsersTable extends BaseTable
                 "icon"   => "mdi mdi-trash-can",
                 "class"  => $this->showDeleted ? "btn-light" : "btn-outline-light",
                 "title"  => $this->showDeleted
-                    ? "Geloeschte ausblenden"
-                    : "Geloeschte anzeigen",
+                    ? "Gelöschte ausblenden"
+                    : "Gelöschte anzeigen",
             ],
 
             [
