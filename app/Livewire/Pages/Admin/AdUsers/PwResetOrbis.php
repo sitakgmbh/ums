@@ -101,7 +101,8 @@ class PwResetOrbis extends Component
 
 			$this->orbisUnlock = false;
 			$this->orbisChangePassword = false;
-			$this->orbisForcePwdChange = (bool)($full['mustchangepassword'] ?? false);
+			// $this->orbisForcePwdChange = (bool)($full['mustchangepassword'] ?? false);
+			$this->orbisForcePwdChange = false;
 
 			$this->orbisPassword = '';
 
