@@ -5,6 +5,9 @@ namespace App\Services\MyPdgr;
 use App\Utils\Logging\Logger;
 use Illuminate\Support\Facades\DB;
 use LdapRecord\Models\ActiveDirectory\User as LdapUser;
+use App\Models\EmployeeLifecycle;
+use App\Enums\EmployeeLifecycleEvent;
+use App\Models\AdUser as LocalAdUser;
 
 class MyPdgrAdSyncService
 {
@@ -124,6 +127,20 @@ class MyPdgrAdSyncService
                     "changes" => $this->changes,
                     "actor" => $this->actor,
                 ]);
+
+				// Lifecycle mitschreiben
+				$dbUser = LocalAdUser::where('username', $username)->first();
+
+				if ($dbUser) 
+				{
+					EmployeeLifecycle::create([
+						'ad_user_id'  => $dbUser->id,
+						'event'       => EmployeeLifecycleEvent::AdUserChange->value,
+						'description' => "Der AD-Benutzer '{$username}' wurde aktualisiert.",
+						'context'     => $context,
+						'event_at'    => now(),
+					]);
+				}
 
                 $this->stats["updated"]++;
             } 

@@ -2,9 +2,11 @@
 
 namespace App\Observers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\AdUser;
 use App\Utils\Logging\Logger;
-use Illuminate\Support\Facades\Auth;
+use App\Models\EmployeeLifecycle;
+use App\Enums\EmployeeLifecycleEvent;
 
 class AdUserObserver
 {
@@ -37,6 +39,16 @@ class AdUserObserver
                 ),
             ]
         );
+
+        EmployeeLifecycle::create([
+            'ad_user_id'  => $user->id,
+            'event'       => EmployeeLifecycleEvent::AdUserCreated->value,
+            'description' => "Der AD-Benutzer '{$user->username}' wurde erstellt.",
+            'context'     => [
+                'source' => 'observer',
+            ],
+            'event_at' => $user->created,
+        ]);
     }
 
     public function updated(AdUser $user): void
