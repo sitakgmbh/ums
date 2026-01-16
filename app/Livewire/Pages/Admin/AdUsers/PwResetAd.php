@@ -59,7 +59,9 @@ class PwResetAd extends Component
 			return;
 		}
 
-		$this->adIsDisabled = (($ldap->useraccountcontrol ?? 0) & 0x0002) === 0x0002;
+		$uac = (int) $ldap->getFirstAttribute('userAccountControl');
+		$this->adIsDisabled = ($uac & 0x0002) === 0x0002;
+
 		$lock = $ldap->lockouttime ?? null;
 		$pwdLastSet = $ldap->pwdlastset instanceof \Carbon\Carbon ? $ldap->pwdlastset->getTimestamp() : (int) ($ldap->pwdlastset ?? 0);
 
