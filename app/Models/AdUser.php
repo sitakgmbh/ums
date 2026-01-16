@@ -159,4 +159,11 @@ class AdUser extends Model
 	{
 		return $this->employee_type?->value ?? 'unknown';
 	}
+
+	public function lifecycle()
+	{
+		return $this->hasMany(\App\Models\EmployeeLifecycle::class, 'ad_user_id')
+			->orderBy('event_at', 'desc');
+	}
+
 }
