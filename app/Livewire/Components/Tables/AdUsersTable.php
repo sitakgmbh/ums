@@ -10,6 +10,7 @@ class AdUsersTable extends BaseTable
 {
     public bool $showInactive = true;
     public bool $showDeleted = false;
+	public array $filterEmployeeTypes = [];
 
     protected $queryString = [
         "showInactive" => ["except" => true],
@@ -18,7 +19,16 @@ class AdUsersTable extends BaseTable
         "perPage" => ["except" => 10],
         "sortField" => ["except" => null],
         "sortDirection" => ["except" => null],
+		"filterEmployeeTypes" => ["except" => []],
     ];
+
+	private const TYPE_ICONS = [
+		'external'         => 'mdi mdi-account-arrow-right',
+		'test'             => 'mdi mdi-flask',
+		'internal'         => 'mdi mdi-account-group',
+		'internal-pending' => 'mdi mdi-account-clock',
+		'unknown'          => 'mdi mdi-help-circle',
+	];
 
     public function toggleInactive(): void
     {
@@ -31,6 +41,17 @@ class AdUsersTable extends BaseTable
         $this->showDeleted = !$this->showDeleted;
         $this->resetPage();
     }
+
+	public function toggleEmployeeFilter(string $type): void
+	{
+		if (in_array($type, $this->filterEmployeeTypes, true)) {
+			$this->filterEmployeeTypes = array_values(array_diff($this->filterEmployeeTypes, [$type]));
+		} else {
+			$this->filterEmployeeTypes[] = $type;
+		}
+
+		$this->resetPage();
+	}
 
     protected function model(): string
     {
@@ -112,25 +133,82 @@ class AdUsersTable extends BaseTable
 				});
 			});
 		}
+
+		if (!empty($this->filterEmployeeTypes)) {
+
+			// interne Kompression: internal = internal + internal-pending
+			$expanded = collect($this->filterEmployeeTypes)
+				->flatMap(fn($t) => $t === 'internal'
+					? ['internal', 'internal-pending']
+					: [$t]
+				)
+				->unique()
+				->values()
+				->toArray();
+
+			$values = "'" . implode("','", $expanded) . "'";
+
+			$query->havingRaw("employee_type_value IN ($values)");
+		}
+
+
 	}
 
     protected function getColumnBadges(): array
     {
         return [
-            "is_enabled" => [
-                true  => ["label" => "Aktiviert", "class" => "success"],
-                false => ["label" => "Deaktiviert", "class" => "secondary"],
+        "is_enabled" => [
+            true  => [
+                "label" => "Aktiviert",
+                "class" => "success",
+                "icon"  => "mdi mdi-lock",
             ],
-            "is_existing" => [
-                true  => ["label" => "Vorhanden", "class" => "success"],
-                false => ["label" => "Gelöscht", "class" => "secondary"],
+            false => [
+                "label" => "Deaktiviert",
+                "class" => "secondary",
+                "icon"  => "mdi mdi-lock",
             ],
+        ],
+
+        "is_existing" => [
+            true  => [
+                "label" => "Vorhanden",
+                "class" => "success",
+                "icon"  => "mdi mdi-trash-can",
+            ],
+            false => [
+                "label" => "Gelöscht",
+                "class" => "secondary",
+                "icon"  => "mdi mdi-trash-can",
+            ],
+        ],
+
 			'employee_type_value' => [
-				'external'         => ['label' => AdUserEmployeeType::External->label(),        'class' => 'secondary'],
-				'test'             => ['label' => AdUserEmployeeType::Test->label(),            'class' => 'info'],
-				'internal'         => ['label' => AdUserEmployeeType::Internal->label(),        'class' => 'success'],
-				'internal-pending' => ['label' => AdUserEmployeeType::InternalPending->label(), 'class' => 'success'],
-				'unknown'          => ['label' => AdUserEmployeeType::Unknown->label(),         'class' => 'danger'],
+				'external' => [
+					'label' => AdUserEmployeeType::External->label(),
+					'class' => AdUserEmployeeType::External->badgeClass(),
+					'icon'  => self::TYPE_ICONS['external'],
+				],
+				'test' => [
+					'label' => AdUserEmployeeType::Test->label(),
+					'class' => AdUserEmployeeType::Test->badgeClass(),
+					'icon'  => self::TYPE_ICONS['test'],
+				],
+				'internal' => [
+					'label' => AdUserEmployeeType::Internal->label(),
+					'class' => AdUserEmployeeType::Internal->badgeClass(),
+					'icon'  => self::TYPE_ICONS['internal'],
+				],
+				'internal-pending' => [
+					'label' => AdUserEmployeeType::InternalPending->label(),
+					'class' => AdUserEmployeeType::InternalPending->badgeClass(),
+					'icon'  => self::TYPE_ICONS['internal-pending'],
+				],
+				'unknown' => [
+					'label' => AdUserEmployeeType::Unknown->label(),
+					'class' => AdUserEmployeeType::Unknown->badgeClass(),
+					'icon'  => self::TYPE_ICONS['unknown'],
+				],
 			],
         ];
     }
@@ -151,6 +229,34 @@ class AdUsersTable extends BaseTable
     protected function getTableActions(): array
     {
         return [
+			[
+				"method" => "toggleEmployeeFilter('internal')",
+				"icon"   => self::TYPE_ICONS['internal'],
+				"iconClass" => "text-secondary",
+				"class" => in_array('internal', $this->filterEmployeeTypes, true) ? "btn-light" : "btn-outline-light",
+				"title" => in_array('internal', $this->filterEmployeeTypes, true) ? "PDGR Mitarbeiter ausblenden" : "PDGR Mitarbeiter anzeigen",
+			],
+			[
+				"method" => "toggleEmployeeFilter('external')",
+				"icon"   => self::TYPE_ICONS['external'],
+				"iconClass" => "text-secondary",
+				"class" => in_array('external', $this->filterEmployeeTypes, true) ? "btn-light" : "btn-outline-light",
+				"title" => in_array('external', $this->filterEmployeeTypes, true) ? "Externe Mitarbeiter ausblenden" : "Externe Mitarbeiter anzeigen",
+			],
+			[
+				"method" => "toggleEmployeeFilter('test')",
+				"icon"   => self::TYPE_ICONS['test'],
+				"iconClass" => "text-secondary",
+				"class" => in_array('test', $this->filterEmployeeTypes, true) ? "btn-light" : "btn-outline-light",
+				"title" => in_array('test', $this->filterEmployeeTypes, true) ? "Test-Benutzer ausblenden" : "Test-Benutzer anzeigen",
+			],
+			[
+				"method" => "toggleEmployeeFilter('unknown')",
+				"icon"   => self::TYPE_ICONS['unknown'],
+				"iconClass" => "text-secondary",
+				"class" => in_array('unknown', $this->filterEmployeeTypes, true) ? "btn-light" : "btn-outline-light",
+				"title" => in_array('unknown', $this->filterEmployeeTypes, true) ? "Unbekannte ausblenden" : "Unbekannte anzeigen",
+			],
             [
                 "method" => "toggleInactive",
                 "icon"   => $this->showInactive ? "mdi mdi-lock" : "mdi mdi-lock",

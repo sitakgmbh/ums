@@ -87,7 +87,9 @@ abstract class BaseTable extends Component
 
     public function getRecordsProperty()
     {
-        $query = $this->model()::query();
+
+		$query = method_exists($this, 'query') ? $this->query() : $this->model()::query();
+
         $this->applyFilters($query);
 
         if ($this->usesDefaultApplyFilters() && $this->search && $this->getSearchableColumns()) 

@@ -5,6 +5,10 @@
 			onclick="Livewire.dispatch('open-modal', { modal: 'components.modals.active-directory.sap-ad-mapping'})">
 			<i class="mdi mdi-account-sync"></i>
 		</button>
+		<button type="button" class="btn btn-primary" title="Passwort zurücksetzen"
+			onclick="Livewire.dispatch('open-modal', { modal: 'components.modals.active-directory.pw-reset-lookup'})">
+			<i class="mdi mdi-key"></i>
+		</button>
 		<button type="button" class="btn btn-primary" title="Geburtstage" 
 			onclick="Livewire.dispatch('open-modal', { modal: 'components.modals.active-directory.birthdays'})">
 			<i class="mdi mdi-cake-variant"></i>
@@ -18,4 +22,5 @@
 @section("modals")
     <livewire:components.modals.active-directory.sap-ad-mapping />
 	<livewire:components.modals.active-directory.birthdays />
+	<livewire:components.modals.active-directory.pw-reset-lookup />
 @endsection
