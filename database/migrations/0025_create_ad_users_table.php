@@ -12,6 +12,7 @@ return new class extends Migration
 		{
             $table->id();
 
+			$table->string("employee_type", 50);
             $table->string("sid", 256)->unique();
             $table->uuid("guid")->nullable()->index();
             $table->string("username");

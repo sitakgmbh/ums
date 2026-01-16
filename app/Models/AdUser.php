@@ -12,7 +12,8 @@ class AdUser extends Model
 	protected $appends = ['employee_type_value'];
 
     protected $fillable = [
-        "sid",
+        "employee_type",
+		"sid",
         "guid",
         "username",
         "firstname",
@@ -150,28 +151,7 @@ class AdUser extends Model
 
 	public function employeeType(): AdUserEmployeeType
 	{
-		$value = trim((string)($this->initials ?? ''));
-
-		if ($value === '00000') return AdUserEmployeeType::External;
-		if ($value === '11111') return AdUserEmployeeType::Test;
-		if ($value === '99999') return AdUserEmployeeType::InternalPending;
-		if (preg_match('/^[67][0-9]{4}$/', $value)) return AdUserEmployeeType::Internal;
-
-		return AdUserEmployeeType::Unknown;
+		return $this->employee_type ?? AdUserEmployeeType::Unknown;
 	}
 
-	public function getEmployeeTypeValueAttribute(): string
-	{
-		return $this->employeeType()->value;
-	}
-
-	public function lifecycle()
-	{
-		return $this->hasMany(EmployeeLifecycle::class, 'ad_user_id')->orderBy('id', 'asc');
-	}
-
-	public function getEventLabelAttribute(): string
-	{
-		return \App\Enums\EmployeeLifecycleEvent::from($this->event)->label();
-	}
 }
