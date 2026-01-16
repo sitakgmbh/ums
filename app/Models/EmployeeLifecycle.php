@@ -9,16 +9,18 @@ class EmployeeLifecycle extends Model
 {
     protected $table = 'employee_lifecycle';
 
-    protected $fillable = [
-        'ad_user_id',
-        'event',
-        'description',
-        'context',
-    ];
+	protected $fillable = [
+		'ad_user_id',
+		'event',
+		'description',
+		'context',
+		'event_at',
+	];
 
-    protected $casts = [
-        'context' => 'array',
-    ];
+	protected $casts = [
+		'context' => 'array',
+		'event_at' => 'datetime',
+	];
 
     public function adUser()
     {

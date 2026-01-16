@@ -286,7 +286,7 @@
 
 							$defaultIcon = ['icon' => 'mdi-information', 'class' => 'bg-light text-muted'];
 
-							$events = $adUser->lifecycle->sortByDesc('created_at');
+							$events = $adUser->lifecycle->sortByDesc('event_at');
 							$latest = $events->first();
 						@endphp
 
@@ -298,7 +298,7 @@
 							@else
 
 								<span class="text-muted small mb-3 d-inline-block">
-									Letzte Änderung: {{ $latest->created_at->format('d.m.Y H:i') }}
+									Letzte Änderung: {{ $latest->event_at->format('d.m.Y H:i') }}
 								</span>
 
 								<div class="timeline-alt py-0">
@@ -322,7 +322,7 @@
 
 												<p class="mb-2">
 													<small class="text-muted">
-														{{ $event->created_at->diffForHumans() }}
+														{{ $event->event_at->diffForHumans() }}
 													</small>
 												</p>
 
