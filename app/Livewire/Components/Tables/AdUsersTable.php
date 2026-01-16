@@ -66,6 +66,7 @@ class AdUsersTable extends BaseTable
             "firstname"     => ["label" => "Vorname",       "sortable" => true, "searchable" => true],
             "lastname"      => ["label" => "Nachname",      "sortable" => true, "searchable" => true],
             "username"      => ["label" => "Benutzername",  "sortable" => true, "searchable" => true],
+			"title"      => ["label" => "Funktion",  "sortable" => true, "searchable" => true],
             "employee_type" => ["label" => "Typ",           "sortable" => true, "searchable" => false],
             "is_enabled"    => ["label" => "Account",       "sortable" => true],
             "is_existing"   => ["label" => "AD Status",     "sortable" => true],
@@ -118,7 +119,8 @@ class AdUsersTable extends BaseTable
                 $q->orWhereRaw("LOWER(display_name) LIKE ?", [$needle])
                   ->orWhereRaw("LOWER(firstname) LIKE ?", [$needle])
                   ->orWhereRaw("LOWER(lastname) LIKE ?", [$needle])
-                  ->orWhereRaw("LOWER(username) LIKE ?", [$needle]);
+                  ->orWhereRaw("LOWER(username) LIKE ?", [$needle])
+				  ->orWhereRaw("LOWER(title) LIKE ?", [$needle]);
             });
         }
 

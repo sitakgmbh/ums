@@ -208,8 +208,9 @@ abstract class BaseTable extends Component
 			$value = $value->value;
 		}
 
-		if ($value === null) {
-			$value = 'null';
+		// Display normalization: show "." for null/empty (but keep 0/false intact)
+		if ($value === null || $value === '') {
+			$value = '';
 		}
 
         // Badges
