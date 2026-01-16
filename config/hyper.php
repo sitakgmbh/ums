@@ -26,6 +26,11 @@ return [
             'title' => 'Admin',
             'items' => [
                 [
+                    'label' => 'Incidents',
+                    'url' => '/admin/incidents',
+                    'icon' => 'mdi mdi-alert',
+                ],
+                [
                     'label' => 'Verarbeitung Anträge',
                     'icon'  => 'mdi mdi-hammer-screwdriver',
                     'children' => [
