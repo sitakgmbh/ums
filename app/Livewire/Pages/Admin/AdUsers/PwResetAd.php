@@ -21,6 +21,7 @@ class PwResetAd extends Component
     public bool $adForcePwdChange = false;
 
     // AD Status
+	public bool $adIsDisabled = false;
     public bool $adIsLocked = false;
     public bool $adRequiresPwdChange = false;
 
@@ -37,14 +38,7 @@ class PwResetAd extends Component
 			$this->loadAdStatus();
 		} catch (\Throwable $e) {
 
-			\Log::warning("AD nicht erreichbar beim Laden von PwResetAd", [
-				'user_id' => $adUser->id,
-				'exception' => $e,
-			]);
-
-			$this->adError = "Das Active Directory ist momentan nicht erreichbar.";
-
-			// Verhindert, dass die Komponente weiter crashed
+			$this->adError = "Verbindung zu Active Directory fehlgeschlagen.";
 			return;
 		}
 	}
@@ -65,8 +59,8 @@ class PwResetAd extends Component
 			return;
 		}
 
+		$this->adIsDisabled = (($ldap->useraccountcontrol ?? 0) & 0x0002) === 0x0002;
 		$lock = $ldap->lockouttime ?? null;
-
 		$pwdLastSet = $ldap->pwdlastset instanceof \Carbon\Carbon ? $ldap->pwdlastset->getTimestamp() : (int) ($ldap->pwdlastset ?? 0);
 
 		$this->adRequiresPwdChange = ($pwdLastSet === 0);

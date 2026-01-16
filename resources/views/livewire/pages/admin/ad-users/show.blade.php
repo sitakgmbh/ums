@@ -294,7 +294,7 @@
 						<div class="tab-pane fade" id="lifecycle">
 
 							@if(!$latest)
-								<p class="text-muted mb-0">Noch keine Lifecycle-Eintraege vorhanden.</p>
+								<p class="text-muted mb-0">Noch keine Lifecycle-Einträge vorhanden.</p>
 							@else
 
 								<span class="text-muted small mb-3 d-inline-block">

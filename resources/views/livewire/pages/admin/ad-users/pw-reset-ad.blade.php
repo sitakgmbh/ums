@@ -14,6 +14,12 @@
                 <div class="alert alert-success mb-3">{{ $adSuccess }}</div>
             @endif
 
+			@if($adIsDisabled)
+				<div class="alert alert-warning mb-3">
+					Dieser AD-Benutzer ist deaktiviert.
+				</div>
+			@endif
+
             <div class="mb-3">
                 <label class="form-label mb-1">Benutzername</label>
                 <input type="text" class="form-control" value="{{ $adUsername }}" disabled>
