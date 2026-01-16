@@ -33,21 +33,22 @@
                 @endif
             @else
 
-                {{-- Account entsperren --}}
-                <div class="form-check mb-1">
-                    <input id="orbisUnlock"
-                           type="checkbox"
-                           class="form-check-input"
-                           wire:model.live="orbisUnlock"
-                           @disabled(!$orbisIsLocked)>
+				{{-- Account entsperren --}}
+				<div class="form-check mb-1">
+					<input id="orbisUnlock"
+						   type="checkbox"
+						   class="form-check-input"
+						   wire:model.live="orbisUnlock"
+						   @disabled(!$orbisIsLocked)>
 
-                    <label class="form-check-label" for="orbisUnlock">
-                        Account entsperren
-                        @unless($orbisIsLocked)
-                            <span class="text-muted small">(nicht gesperrt)</span>
-                        @endunless
-                    </label>
-                </div>
+					<label class="form-check-label" for="orbisUnlock">
+						Account entsperren
+
+						<span class="text-muted small">
+							(aktuell {{ $orbisIsLocked ? 'gesperrt' : 'entsperrt' }})
+						</span>
+					</label>
+				</div>
 
                 {{-- Passwort ändern --}}
                 <div class="form-check mb-2">
