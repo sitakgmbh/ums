@@ -64,7 +64,7 @@
 
                 @if($orbisChangePassword)
 
-                    <div class="mb-2">
+                    <div class="mb-1">
                         <label class="form-label mb-1">Neues Passwort</label>
                         <div class="input-group">
                             <input type="text"
